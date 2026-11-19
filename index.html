@@ -1,0 +1,2924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Villamartín Joyride - Edición Exploración y Jefes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-deep: #120e1e;
+      --panel: #201933;
+      --panel-alt: #2b2244;
+      --border: #f5e6c4;
+      --shadow: #0a0712;
+      --gold: #facc15;
+      --gold-dark: #b45309;
+      --green: #22c55e;
+      --blue: #38bdf8;
+      --red: #ef4444;
+      --text: #fdfbf7;
+      --muted: #b9b1ce;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: radial-gradient(circle at 50% 0%, #2a2045 0%, #100c1b 100%);
+      color: var(--text);
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    #app-shell {
+      width: 100%;
+      max-width: 1040px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--panel);
+      border: 4px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 0 var(--shadow), inset 0 -3px 0 #140f22;
+    }
+
+    .brand { display: flex; flex-direction: column; gap: 3px; }
+    .brand-main { font-size: clamp(10px, 1.9vw, 15px); color: var(--gold); text-shadow: 2px 2px 0 #000; }
+    .brand-sub { font-size: clamp(6px, 1.1vw, 8px); color: #93c5fd; }
+    .top-right { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #130f20;
+      border: 3px solid #493d6b;
+      border-radius: 8px;
+      padding: 6px 9px;
+      font-size: clamp(7px, 1.3vw, 10px);
+    }
+    .stat-pill.coins { border-color: var(--gold-dark); color: var(--gold); }
+    .stat-pill.record { border-color: #0284c7; color: #7dd3fc; }
+    .stat-pill.bosses { border-color: #991b1b; color: #fca5a5; }
+
+    .pixel-btn {
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+      cursor: pointer;
+      border: 3px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: clamp(7px, 1.3vw, 10px);
+      line-height: 1.4;
+      color: var(--text);
+      background: linear-gradient(180deg, #3c315d 0%, #241c3c 100%);
+      box-shadow: 0 4px 0 var(--shadow), inset 0 2px 0 rgba(255,255,255,0.18);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.75);
+      transition: transform 0.08s ease, filter 0.12s ease;
+    }
+    .pixel-btn:hover:not(:disabled) { filter: brightness(1.14); transform: translateY(-1px); }
+    .pixel-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--shadow); }
+    .pixel-btn:disabled { opacity: 0.55; cursor: not-allowed; filter: grayscale(0.35); }
+    .pixel-btn.primary {
+      background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+      border-color: #dcfce7;
+      animation: glowPulse 2s infinite ease-in-out;
+    }
+    .pixel-btn.gold { background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%); border-color: #fef3c7; }
+    .pixel-btn.blue { background: linear-gradient(180deg, #0ea5e9 0%, #0369a1 100%); border-color: #e0f2fe; }
+    .pixel-btn.red { background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%); border-color: #fee2e2; }
+    .pixel-btn.small { padding: 6px 9px; font-size: clamp(6px, 1.1vw, 8px); }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 4px 0 var(--shadow), 0 0 10px rgba(34,197,94,0.45); }
+      50% { box-shadow: 0 4px 0 var(--shadow), 0 0 22px rgba(74,222,128,0.85); }
+    }
+
+    .stage-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 250px;
+      max-height: 68vh;
+      background: #0d0a16;
+      border: 4px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 0 var(--shadow), 0 14px 30px rgba(0,0,0,0.55);
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    #game-hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 12px;
+    }
+
+    .hud-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+
+    .hud-box {
+      background: rgba(14, 10, 24, 0.82);
+      border: 2px solid rgba(245, 230, 196, 0.85);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: clamp(7px, 1.3vw, 10px);
+      line-height: 1.6;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .hud-boss-bar {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: rgba(20, 8, 18, 0.88);
+      border: 2px solid #facc15;
+      border-radius: 8px;
+      padding: 6px 10px;
+      min-width: 240px;
+      max-width: 46%;
+      flex: 1;
+    }
+    .hud-boss-bar.visible { display: flex; }
+    .boss-bar-title { font-size: clamp(6px, 1.1vw, 9px); color: #fde047; text-shadow: 2px 2px 0 #000; text-align: center; }
+    .boss-bar-track { width: 100%; height: 12px; background: #450a0a; border: 2px solid #fef08a; border-radius: 4px; overflow: hidden; }
+    .boss-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ef4444, #f59e0b); transition: width 0.08s linear; }
+
+    .hud-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+    .status-tag { padding: 3px 6px; border-radius: 6px; font-size: clamp(6px, 1vw, 8px); border: 2px solid #fff; background: rgba(0,0,0,0.75); }
+    .status-tag.shield { border-color: #38bdf8; color: #7dd3fc; }
+    .status-tag.turbo { border-color: #f97316; color: #fdba74; }
+    .status-tag.magnet { border-color: #e879f9; color: #f5d0fe; }
+    .status-tag.x2 { border-color: #facc15; color: #fef08a; }
+    .status-tag.revive { border-color: #4ade80; color: #bbf7d0; }
+
+    .hud-controls { pointer-events: auto; display: flex; gap: 6px; }
+    .hud-hint {
+      align-self: center;
+      background: rgba(14, 10, 24, 0.78);
+      border: 2px solid rgba(255,255,255,0.35);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: clamp(6px, 1.1vw, 8px);
+      color: #fde68a;
+      transition: opacity 0.6s ease;
+    }
+
+    #bottom-panel {
+      background: var(--panel);
+      border: 4px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 0 var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .controls-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px; }
+    .controls-between { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+    .meta-strip { border-top: 2px dashed #423663; padding-top: 8px; font-size: clamp(6px, 1.1vw, 8px); color: var(--muted); line-height: 1.6; }
+
+    .dpad-cluster { display: flex; align-items: center; gap: 5px; }
+    .dpad-btn { width: 38px; height: 36px; padding: 0; font-size: 12px; }
+    .dpad-btn:active, .dpad-btn.active { transform: translateY(2px); box-shadow: 0 1px 0 var(--shadow); background: #f59e0b; color: #111; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 5, 14, 0.84);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+      padding: 10px;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      width: 100%;
+      max-width: 880px;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: var(--panel);
+      border: 4px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 0 var(--shadow), 0 0 36px rgba(0,0,0,0.75);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: popModal 0.16s ease-out;
+    }
+    .modal-card.compact { max-width: 480px; text-align: center; }
+
+    @keyframes popModal {
+      from { transform: scale(0.94) translateY(8px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 3px solid #3f3361;
+      padding-bottom: 10px;
+    }
+    .modal-title { font-size: clamp(10px, 1.9vw, 14px); color: var(--gold); text-shadow: 2px 2px 0 #000; line-height: 1.45; }
+    .modal-sub { font-size: clamp(6px, 1.1vw, 8px); color: var(--muted); line-height: 1.6; margin-top: 4px; }
+
+    .porri-layout { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }
+    .roster-list { display: flex; flex-direction: column; gap: 7px; }
+    .roster-btn { width: 100%; justify-content: space-between; text-align: left; padding: 8px 10px; background: #161126; border: 3px solid #443866; }
+    .roster-btn.active { border-color: var(--gold); background: #281f44; box-shadow: 0 0 12px rgba(250,204,21,0.3); }
+    .roster-btn.equipped-char { border-color: var(--green); }
+
+    .preview-studio { background: #151024; border: 3px solid #4c3e74; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .preview-stage-grid { display: grid; grid-template-columns: 165px 1fr; gap: 10px; align-items: stretch; }
+    .preview-box {
+      background: radial-gradient(circle at 50% 40%, #2a2046 0%, #100c1b 100%);
+      border: 3px solid #3c305e;
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .preview-box canvas { width: 140px; height: 140px; }
+    .preview-label { font-size: 7px; color: #93c5fd; text-align: center; }
+
+    .skin-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .skin-tab { flex: 1; min-width: 130px; }
+    .skin-tab.selected { border-color: var(--gold); background: linear-gradient(180deg, #4b3b77 0%, #2c214a 100%); color: var(--gold); }
+    .traits-line { background: #1e1732; border: 2px solid #3f3263; border-radius: 8px; padding: 8px 10px; font-size: 8px; line-height: 1.75; color: #e2dcf2; }
+
+    .section-hdr { font-size: 9px; color: #7dd3fc; border-bottom: 2px dashed #3f3361; padding-bottom: 6px; margin-top: 4px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .item-card { background: #161126; border: 3px solid #433766; border-radius: 10px; padding: 11px; display: flex; flex-direction: column; justify-content: space-between; gap: 9px; }
+    .item-card.equipped { border-color: var(--green); box-shadow: 0 0 12px rgba(34,197,94,0.25); }
+    .item-name { font-size: 9px; color: var(--text); line-height: 1.5; }
+    .item-desc { font-size: 7.5px; color: #c5bddb; line-height: 1.7; }
+
+    .pips { display: flex; gap: 4px; margin: 4px 0; }
+    .pip { width: 18px; height: 9px; background: #2b2244; border: 2px solid #594a80; border-radius: 3px; }
+    .pip.on { background: var(--gold); border-color: #fef08a; box-shadow: 0 0 6px rgba(250,204,21,0.5); }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .summary-cell { background: #140f22; border: 2px solid #483b6b; border-radius: 8px; padding: 9px 6px; }
+    .summary-lbl { font-size: 6.5px; color: var(--muted); margin-bottom: 5px; }
+    .summary-val { font-size: clamp(10px, 2vw, 13px); color: var(--gold); }
+    .record-banner { background: linear-gradient(90deg, #b45309, #f59e0b, #b45309); border: 2px solid #fef08a; border-radius: 8px; padding: 7px; font-size: 9px; text-shadow: 2px 2px 0 #000; }
+
+    #toast {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(18px);
+      background: #171127;
+      color: var(--gold);
+      border: 3px solid var(--gold);
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: clamp(7px, 1.3vw, 9px);
+      box-shadow: 0 6px 0 #090710;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 100;
+      text-align: center;
+      max-width: 92vw;
+      line-height: 1.5;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 740px) {
+      .porri-layout { grid-template-columns: 1fr; }
+      .roster-list { display: grid; grid-template-columns: repeat(2, 1fr); }
+      .preview-stage-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      body { padding: 4px; }
+      .stage-wrapper { aspect-ratio: 16 / 10; min-height: 225px; }
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+	html, body { overscroll-behavior: none; touch-action: manipulation; }
+    canvas, .dpad-btn, #btn-mobile-boost { touch-action: none; -webkit-touch-callout: none; }
+
+    #btn-mobile-boost {
+      width: 100%;
+      padding: 15px 12px;
+      font-size: clamp(9px, 2.6vw, 12px);
+      letter-spacing: 0.5px;
+    }
+
+    .auth-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .auth-input {
+      width: 100%;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      font-weight: bold;
+      background: #100c1b;
+      color: var(--text);
+      border: 2px solid #594a80;
+      border-radius: 8px;
+      padding: 10px;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    @media (max-width: 650px) {
+      .dpad-btn { width: 46px; height: 42px; font-size: 14px; }
+      #btn-hub-interact { height: 42px !important; }
+      .stage-wrapper { max-height: 56vh; }
+    }
+  </style>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="app-shell">
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-main">🚀 VILLAMARTÍN JOYRIDE</div>
+        <div class="brand-sub">SIERRA DE CÁDIZ • MAPA EXPLORABLE + LA PEÑA + JEFES</div>
+      </div>
+      <div class="top-right">
+        <div class="stat-pill coins">🪙 <span id="ui-coins">0</span></div>
+        <div class="stat-pill record">🏆 <span id="ui-record">0</span>m</div>
+        <div class="stat-pill bosses">💀 <span id="ui-bosses">0</span></div>
+        <button id="btn-fly-quick" class="pixel-btn primary small" style="padding:7px 11px;">🚀 VOLAR YA</button>
+        <button id="btn-account" class="pixel-btn small blue">👤 CUENTA</button>
+		<button id="btn-sound-top" class="pixel-btn small" title="Activar/Silenciar audio">🔊</button>
+      </div>
+    </header>
+
+    <main class="stage-wrapper">
+      <canvas id="hub-canvas" width="960" height="540"></canvas>
+      <canvas id="game-canvas" width="960" height="540" style="display:none;"></canvas>
+
+      <div id="game-hud">
+        <div class="hud-top">
+          <div>
+            <div class="hud-box">
+              <div>📏 <span id="hud-dist">0</span>m <span style="color:#7dd3fc;">(REC: <span id="hud-best">0</span>m)</span></div>
+              <div style="color:#facc15;">🪙 <span id="hud-coins">0</span> <span id="hud-zone" style="color:#c4b5fd;font-size:7px;margin-left:6px;">DÍA</span> <span id="hud-next-boss" style="color:#fca5a5;font-size:7px;margin-left:6px;">JEFE: 350m</span></div>
+            </div>
+            <div class="hud-tags" id="hud-tags"></div>
+          </div>
+
+          <div class="hud-boss-bar" id="hud-boss-bar">
+            <div class="boss-bar-title" id="boss-bar-title">JEFE GIGANTE</div>
+            <div class="boss-bar-track"><div class="boss-bar-fill" id="boss-bar-fill"></div></div>
+          </div>
+
+          <div class="hud-controls">
+            <button id="btn-sound-hud" class="pixel-btn small">🔊</button>
+            <button id="btn-pause" class="pixel-btn small gold">⏸ PAUSA</button>
+          </div>
+        </div>
+        <div class="hud-hint" id="hud-hint">MANTÉN ESPACIO / ↑ / CLIC / PANTALLA PARA PROPULSAR</div>
+      </div>
+    </main>
+
+    <section id="bottom-panel">
+      <div id="hub-controls">
+        <div class="controls-between">
+          <div class="controls-row" style="justify-content:flex-start;">
+            <button class="pixel-btn small gold" data-walk-to="porri">🍺 Bar Porri</button>
+            <button class="pixel-btn small blue" data-walk-to="iglesia">⛪ La Iglesia</button>
+            <button class="pixel-btn small" style="background:linear-gradient(180deg,#16a34a,#14532d);" data-walk-to="mercadona">🛒 Mercadona</button>
+            <button class="pixel-btn small" style="background:linear-gradient(180deg,#c2410c,#7c2d12);" data-walk-to="ies">🏫 IES / Poli</button>
+            <button class="pixel-btn small primary" style="animation:none;" data-walk-to="arco">🏁 Arco Salida</button>
+          </div>
+
+          <div class="dpad-cluster" title="Mover por Villamartín">
+            <button class="pixel-btn dpad-btn" data-pad="left">◀</button>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <button class="pixel-btn dpad-btn" style="height:24px;font-size:9px;" data-pad="up">▲</button>
+              <button class="pixel-btn dpad-btn" style="height:24px;font-size:9px;" data-pad="down">▼</button>
+            </div>
+            <button class="pixel-btn dpad-btn" data-pad="right">▶</button>
+            <button id="btn-hub-interact" class="pixel-btn small gold" style="height:36px;">🚪 ENTRAR</button>
+          </div>
+        </div>
+
+        <div class="controls-between meta-strip">
+          <div>
+            Piloto: <strong id="hub-pilot" style="color:#facc15;">Estándar</strong> •
+            Jetpack: <strong id="hub-jetpack" style="color:#7dd3fc;">Clásico</strong> •
+            <span id="hub-nearby" style="color:#4ade80;">Camina con WASD/Flechas o haz clic en un edificio</span>
+          </div>
+          <div class="controls-row" style="justify-content:flex-end;">
+            <button id="btn-unlock-skins" class="pixel-btn small">🔓 25 SKINS</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="run-controls" style="display:none;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button id="btn-mobile-boost" class="pixel-btn primary" style="animation:none;">🚀 MANTÉN PULSADO PARA VOLAR</button>
+          <div class="controls-between meta-strip" style="border-top:none;padding-top:0;">
+            <div>✈️ Mantén pulsado el botón o la pantalla • Auto-disparo contra Jefes</div>
+            <button id="btn-run-hub" class="pixel-btn small">🗺 VOLVER AL PUEBLO</button>
+          </div>
+        </div>
+      </div>
+          <div class="controls-row">
+            <button id="btn-run-hub" class="pixel-btn small">🗺 VOLVER AL PUEBLO</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="shop-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="shop-modal-title">EDIFICIO</div>
+          <div class="modal-sub" id="shop-modal-sub">Villamartín, Cádiz</div>
+        </div>
+        <div class="controls-row">
+          <div class="stat-pill coins">🪙 <span id="shop-modal-coins">0</span></div>
+          <button id="btn-close-shop" class="pixel-btn small red">✕ SALIR</button>
+        </div>
+      </div>
+      <div id="shop-modal-body"></div>
+    </div>
+  </div>
+
+  <div id="pause-modal" class="modal-backdrop">
+    <div class="modal-card compact">
+      <div class="modal-title">⏸ PAUSA</div>
+      <div class="modal-sub">Respira un segundo mirando la Sierra de Cádiz</div>
+      <div class="controls-row" style="margin-top:8px;">
+        <button id="btn-resume" class="pixel-btn primary">▶ CONTINUAR</button>
+        <button id="btn-pause-restart" class="pixel-btn gold">↻ REINICIAR</button>
+        <button id="btn-pause-hub" class="pixel-btn blue">🗺 AL PUEBLO</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="gameover-modal" class="modal-backdrop">
+    <div class="modal-card compact">
+      <div class="modal-title" id="go-title">💥 ¡FIN DEL VUELO!</div>
+      <div class="modal-sub" id="go-reason">Te estrellaste sobre Villamartín</div>
+      <div id="go-record-banner" class="record-banner" style="display:none;">🏆 ¡NUEVO RÉCORD DEL PUEBLO!</div>
+      <div class="summary-grid">
+        <div class="summary-cell">
+          <div class="summary-lbl">DISTANCIA</div>
+          <div class="summary-val" id="go-dist">0m</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-lbl">JEFES K.O.</div>
+          <div class="summary-val" id="go-bosses" style="color:#f87171;">0</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-lbl">MONEDAS</div>
+          <div class="summary-val" id="go-coins">+0</div>
+        </div>
+      </div>
+      <div class="controls-row" style="margin-top:6px;">
+        <button id="btn-go-retry" class="pixel-btn primary">🚀 VOLAR OTRA VEZ</button>
+        <button id="btn-go-hub" class="pixel-btn blue">🗺 VOLVER AL MAPA</button>
+      </div>
+    </div>
+  </div>
+<div id="auth-modal" class="modal-backdrop">
+    <div class="modal-card compact">
+      <div class="modal-header">
+        <div class="modal-title">👤 TU CUENTA</div>
+        <button id="btn-close-auth" class="pixel-btn small red">✕</button>
+      </div>
+      <div class="modal-sub" id="auth-status">Guarda tus monedas, skins y récords para jugar desde el móvil y el PC.</div>
+
+      <div id="auth-form-box" class="auth-box">
+        <input id="auth-email" class="auth-input" type="email" placeholder="Tu correo (ej: juan@gmail.com)" autocomplete="email" />
+        <input id="auth-pass" class="auth-input" type="password" placeholder="Contraseña (mín. 6 caracteres)" autocomplete="current-password" />
+        <div class="controls-row">
+          <button id="btn-auth-login" class="pixel-btn primary" style="flex:1;animation:none;">ENTRAR</button>
+          <button id="btn-auth-register" class="pixel-btn gold" style="flex:1;">CREAR CUENTA</button>
+        </div>
+      </div>
+
+      <div id="auth-logged-box" class="controls-row" style="display:none;">
+        <button id="btn-auth-logout" class="pixel-btn red" style="width:100%;">CERRAR SESIÓN</button>
+      </div>
+
+      <div class="section-hdr" style="text-align:left;margin-top:6px;">📋 RESPALDO RÁPIDO (SIN CUENTA)</div>
+      <div class="auth-box">
+        <input id="backup-code" class="auth-input" type="text" placeholder="Pega aquí un código de progreso..." />
+        <div class="controls-row">
+          <button id="btn-export-code" class="pixel-btn small blue" style="flex:1;">COPIAR CÓDIGO</button>
+          <button id="btn-import-code" class="pixel-btn small gold" style="flex:1;">CARGAR CÓDIGO</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="toast"></div>
+
+  <script>
+  (function() {
+    'use strict';
+
+    // 1. AUDIO 8-BIT SINTETIZADO
+    const AudioSys = {
+      ctx: null,
+      enabled: true,
+      lastJet: 0,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+      },
+      tone(freq, dur, type = 'square', vol = 0.075, slideTo = null) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          if (slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(25, slideTo), now + dur);
+          g.gain.setValueAtTime(vol, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+          osc.connect(g);
+          g.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + dur);
+        } catch (e) {}
+      },
+      click() { this.tone(540, 0.04, 'square', 0.05, 720); },
+      coin(combo = 0) { const f = 760 + Math.min(combo, 10) * 52; this.tone(f, 0.07, 'square', 0.055, f * 1.35); },
+      jet() {
+        const now = performance.now();
+        if (now - this.lastJet < 65) return;
+        this.lastJet = now;
+        this.tone(108 + Math.random() * 42, 0.055, 'sawtooth', 0.032, 62);
+      },
+      shoot() { this.tone(640, 0.05, 'square', 0.035, 230); },
+      bossHit() { this.tone(185, 0.05, 'triangle', 0.06, 95); },
+      hit() { this.tone(190, 0.24, 'sawtooth', 0.11, 48); },
+      shield() { this.tone(480, 0.22, 'triangle', 0.09, 130); },
+      powerup() { this.tone(440, 0.08, 'square', 0.065, 660); setTimeout(() => this.tone(660, 0.12, 'square', 0.065, 990), 80); },
+      alarm() { this.tone(720, 0.14, 'sawtooth', 0.065, 480); setTimeout(() => this.tone(720, 0.14, 'sawtooth', 0.065, 480), 175); },
+      bossWin() { [523, 659, 784, 1046].forEach((n, i) => setTimeout(() => this.tone(n, 0.16, 'square', 0.075), i * 110)); }
+    };
+
+    // 2. PERSONAJES (7) Y SKINS (20) + JETPACKS + MEJORAS
+	const calcHeight = (m) => +(1 + (m - 1.70) * 1.35).toFixed(3);
+    const CHARACTERS = [
+      {
+        id: 'estandar',
+        name: 'Estándar',
+        tagline: 'Piloto estándar de Villamartín listo para despegar.',
+        heightScale: calcHeight(1.70),
+        widthScale: 1.0,
+        skins: [
+          {
+            id: 'estandar_casual',
+            name: 'Pueblerino',
+            price: 0,
+            desc: 'Camiseta azul casual, vaqueros y zapatillas cómodas.',
+            taunt: '¡Un piloto cualquiera también puede ser un jefe!',
+            projColor: '#38bdf8',
+            projType: 'orb',
+            style: {
+              skin: '#eabca0', hair: '#4a3222', hairType: 'fade_short',
+              eyes: '#2b1d14', facial: 'none',
+              torso: 'crewneck', topColor: '#2563eb', topAccent: '#1d4ed8',
+              pants: '#334155', shoes: '#f8fafc', acc: 'none'
+            }
+          }
+        ]
+      },
+      {
+        id: 'juan',
+        name: 'Juan',
+        tagline: 'Pelo rizado con volumen, ojos azules y perilla.',
+        heightScale: calcHeight(1.72),
+        widthScale: 1.0,
+        skins: [
+          {
+            id: 'juan_casual',
+            name: 'normal',
+            price: 120,
+            desc: 'Pelo rizado castaño, ojos azules, perilla, sudadera granate y vaqueros oscuros.',
+            taunt: '¡En Villamartín mandan mis rizos!',
+            projColor: '#be123c',
+            projType: 'orb',
+            style: {
+              skin: '#ebc0a6', hair: '#3d281c', hairType: 'curly',
+              eyes: '#38bdf8', facial: 'juan_goatee',
+              torso: 'hoodie', topColor: '#7f1d1d', topAccent: '#991b1b',
+              pants: '#1e293b', shoes: '#f8fafc', acc: 'none'
+            }
+          },
+          {
+            id: 'juan_betis',
+            name: 'Juan Betis',
+            price: 200,
+            desc: 'Camiseta verdiblanca del Real Betis Balompié con sus ojos azules y perilla.',
+            taunt: '¡Musho Betis desde los cielos de Villamartín!',
+            projColor: '#16a34a',
+            projType: 'ball_betis',
+            style: {
+              skin: '#ebc0a6', hair: '#3d281c', hairType: 'curly',
+              eyes: '#38bdf8', facial: 'juan_goatee',
+              torso: 'betis', topColor: '#15803d', topAccent: '#ffffff',
+              pants: '#14532d', shoes: '#ffffff', acc: 'none'
+            }
+          },
+		  {
+            id: 'juan_matematico',
+            name: 'Juan Matemático',
+            price: 200,
+            desc: 'Jersey académico con símbolo π, camisa blanca, gafas y escuadra con tiza.',
+            taunt: '¡Q.E.D.: queda demostrado que no pasas!',
+            projColor: '#38bdf8',
+            projType: 'math_pi',
+            style: {
+              skin: '#ebc0a6', hair: '#3d281c', hairType: 'curly',
+              eyes: '#38bdf8', facial: 'juan_goatee',
+              torso: 'math_outfit', topColor: '#1e3a5f', topAccent: '#ffffff',
+              pants: '#334155', shoes: '#1e293b', acc: 'math_gear'
+            }
+          }
+        ]
+      },
+      {
+        id: 'buti',
+        name: 'Buti',
+        tagline: 'Flequillo recto degradado, perilla, del Betis y disfraces míticos.',
+        heightScale: calcHeight(1.72),
+        widthScale: 0.98,
+        skins: [
+          {
+            id: 'buti_casual',
+            name: 'normal',
+            price: 120,
+            desc: 'Bomber azul marino abierta, camiseta blanca y joggers grises.',
+            taunt: '¡No te escapas ni volando al Poli!',
+            projColor: '#38bdf8',
+            projType: 'orb',
+            style: {
+              skin: '#ebc0a6', hair: '#231712', hairType: 'blunt',
+              eyes: '#1e1612', facial: 'goatee',
+              torso: 'bomber', topColor: '#1e3a5f', topAccent: '#f8fafc',
+              pants: '#64748b', shoes: '#e2e8f0', acc: 'none'
+            }
+          },
+          {
+            id: 'buti_madrid',
+            name: 'Buti Madrid',
+            price: 200,
+            desc: 'Equipación blanca del Real Madrid con detalles dorados y azul marino.',
+            taunt: '¡Hala Madrid y nada más!',
+            projColor: '#fef08a',
+            projType: 'ball_madrid',
+            style: {
+              skin: '#ebc0a6', hair: '#231712', hairType: 'blunt',
+              eyes: '#1e1612', facial: 'goatee',
+              torso: 'madrid', topColor: '#ffffff', topAccent: '#eab308',
+              pants: '#f8fafc', shoes: '#1e3a8a', acc: 'none'
+            }
+          },
+          {
+            id: 'buti_disfraz',
+            name: 'Buti Disfraz',
+            price: 200,
+            desc: 'Sudadera blanca Smoothie, gafas metálicas verdosas y falda tutú naranja.',
+            taunt: '¡Teme al poder de la falda naranja!',
+            projColor: '#fb923c',
+            projType: 'smoothie',
+            style: {
+              skin: '#ebc0a6', hair: '#231712', hairType: 'blunt',
+              eyes: '#1e1612', facial: 'goatee',
+              torso: 'smoothie_hoodie', topColor: '#f8fafc', topAccent: '#4ade80',
+              pants: '#f97316', shoes: '#f8fafc', acc: 'green_shades', skirt: '#ff7b1c'
+            }
+          },
+          {
+            id: 'buti_carnaval',
+            name: 'Buti Carnavales 2024',
+            price: 200,
+            desc: 'Gafas oscuras, chándal verde oliva/crema con cremallera flúor y bastón negro.',
+            taunt: '¡Carnavales 2024: toma bastonazo aéreo!',
+            projColor: '#a3e635',
+            projType: 'cane',
+            style: {
+              skin: '#ebc0a6', hair: '#231712', hairType: 'blunt',
+              eyes: '#111', facial: 'goatee',
+              torso: 'carnaval_track', topColor: '#6b8e4e', topAccent: '#e7e5c5',
+              zipColor: '#d9f99d', pants: '#111827', shoes: '#f8fafc',
+              acc: 'dark_shades', cane: true
+            }
+          }
+        ]
+      },
+      {
+        id: 'ricardo',
+        name: 'Ricardo',
+        tagline: 'Complexión grande, flequillo tupido, culé y estilo camaleónico.',
+        heightScale: calcHeight(1.85),
+        widthScale: 1.12,
+        skins: [
+          {
+            id: 'ricardo_casual',
+            name: 'Casual',
+            price: 120,
+            desc: 'Polo amarillo mostaza, pantalón oscuro, bigotillo y perilla.',
+            taunt: '¡El más grande de la foto te cierra el cielo!',
+            projColor: '#eab308',
+            projType: 'orb',
+            style: {
+              skin: '#eabca0', hair: '#2c1b12', hairType: 'thick_bangs',
+              eyes: '#241812', facial: 'stache_goatee',
+              torso: 'polo', topColor: '#eab308', topAccent: '#ca8a04',
+              pants: '#1e293b', shoes: '#f8fafc', acc: 'none'
+            }
+          },
+          {
+            id: 'ricardo_barca',
+            name: 'Ricardo Barça',
+            price: 200,
+            desc: 'Camiseta azulgrana del FC Barcelona con detalles dorados.',
+            taunt: '¡Visca el Barça! ¡A ver si paras estos tiros!',
+            projColor: '#b91c1c',
+            projType: 'ball_barca',
+            style: {
+              skin: '#eabca0', hair: '#2c1b12', hairType: 'thick_bangs',
+              eyes: '#241812', facial: 'stache_goatee',
+              torso: 'barca', topColor: '#1d4ed8', topAccent: '#991b1b',
+              pants: '#1e3a8a', shoes: '#facc15', acc: 'none'
+            }
+          },
+          {
+            id: 'ricardo_cayetano',
+            name: 'Ricardo Cayetano',
+            price: 200,
+            desc: 'Chaleco acolchado oliva oscuro sobre jersey beige y chinos crema.',
+            taunt: '¡O sea, qué hace este tío en mi espacio aéreo!',
+            projColor: '#d6c7b2',
+            projType: 'watch',
+            style: {
+              skin: '#eabca0', hair: '#2c1b12', hairType: 'thick_bangs',
+              eyes: '#241812', facial: 'stubble',
+              torso: 'puffer_vest', topColor: '#4b4a3e', topAccent: '#b7a99a',
+              pants: '#e7e5e4', shoes: '#78350f', acc: 'none'
+            }
+          },
+          {
+            id: 'ricardo_abogado',
+            name: 'Ricardo Abogado',
+            price: 200,
+            desc: 'Traje oscuro elegante, camisa blanca, corbata amarilla y maletín de juicios.',
+            taunt: '¡Protesto, Señoría! ¡Te vas a comer una demanda!',
+            projColor: '#facc15',
+            projType: 'gavel',
+            style: {
+              skin: '#eabca0', hair: '#2c1b12', hairType: 'thick_bangs',
+              eyes: '#241812', facial: 'stache_goatee',
+              torso: 'lawyer_suit', topColor: '#1e293b', topAccent: '#eab308',
+              pants: '#0f172a', shoes: '#1c1917', acc: 'briefcase'
+            }
+          }
+        ]
+      },
+      {
+        id: 'lara',
+        name: 'Lara',
+        tagline: 'Fuerte, ojos azules, barba perfilada, del Betis y rey del pantano.',
+        heightScale: calcHeight(1.68),
+        widthScale: 1.18,
+        skins: [
+          {
+            id: 'lara_casual',
+            name: 'Lara Casual',
+            price: 120,
+            desc: 'Ojos azules, polo blanco texturizado, barba recortada y reloj plateado.',
+            taunt: '¡A ver si esquivas esto, máquina!',
+            projColor: '#f8fafc',
+            projType: 'orb',
+            style: {
+              skin: '#dca17d', hair: '#221610', hairType: 'short_fade',
+              eyes: '#38bdf8', facial: 'full_beard',
+              torso: 'polo', topColor: '#f5f5f4', topAccent: '#d6d3d1',
+              pants: '#1e293b', shoes: '#e2e8f0', acc: 'watch'
+            }
+          },
+          {
+            id: 'lara_betis',
+            name: 'Lara Betis',
+            price: 200,
+            desc: 'Camiseta verdiblanca del Real Betis Balompié y ojos azules. ¡Musho Betis!',
+            taunt: '¡MANQUE PIERDA, HOY TE GANO YO!',
+            projColor: '#16a34a',
+            projType: 'ball_betis',
+            style: {
+              skin: '#dca17d', hair: '#221610', hairType: 'short_fade',
+              eyes: '#38bdf8', facial: 'full_beard',
+              torso: 'betis', topColor: '#15803d', topAccent: '#ffffff',
+              pants: '#14532d', shoes: '#ffffff', acc: 'none'
+            }
+          },
+          {
+            id: 'lara_shrek',
+            name: 'Lara Shrek',
+            price: 250,
+            desc: 'Cara verde, ojos azules, gorro con orejas de ogro, chaleco marrón y cuadros.',
+            taunt: '¡FUERA DE MI PANTANO DE VILLAMARTÍN!',
+            projColor: '#84cc16',
+            projType: 'onion',
+            style: {
+              skin: '#5cb83c', hair: '#221610', hairType: 'shrek_hat',
+              eyes: '#38bdf8', facial: 'green_beard',
+              torso: 'shrek_vest', topColor: '#5c3a21', topAccent: '#f8fafc',
+              pants: '#78563c', plaidPants: true, shoes: '#3f2818', acc: 'none'
+            }
+          },
+          {
+            id: 'lara_socorrista',
+            name: 'Lara Socorrista',
+            price: 200,
+            desc: 'Ojos azules, camiseta roja con cruz blanca, silbato y torpedo naranja.',
+            taunt: '¡PROHIBIDO CORRER POR LA PISCINA!',
+            projColor: '#ef4444',
+            projType: 'buoy',
+            style: {
+              skin: '#d4956f', hair: '#221610', hairType: 'short_fade',
+              eyes: '#38bdf8', facial: 'full_beard',
+              torso: 'lifeguard', topColor: '#dc2626', topAccent: '#ffffff',
+              pants: '#b91c1c', shoes: '#fb923c', acc: 'lifeguard_gear'
+            }
+          }, 
+		  {
+            id: 'lara_culon',
+            name: 'Lara Culón',
+            price: 250,
+            desc: 'Camiseta roja de la Selección Española y tremendo culazo al aire.',
+            taunt: '¡Apártate que te arrollo con este tren trasero!',
+            projColor: '#dc2626',
+            projType: 'ball_spain',
+            style: {
+              skin: '#dca17d', hair: '#221610', hairType: 'short_fade',
+              eyes: '#38bdf8', facial: 'full_beard',
+              torso: 'spain_jersey', topColor: '#dc2626', topAccent: '#facc15',
+              pants: '#dca17d', shoes: '#dc2626', acc: 'none', bigButt: true
+            }
+          }
+        ]
+      },
+      {
+        id: 'porri',
+        name: 'Porri',
+        tagline: 'El más alto de toda la pandilla. Inconfundible.',
+        heightScale: calcHeight(1.92),
+        widthScale: 0.94,
+        skins: [
+          {
+            id: 'porri_casual',
+            name: 'Porri (Extra Alto)',
+            price: 120,
+            desc: 'Mucho más alto que todos, ojos verdes claros, degradado, bigotillo y sudadera azul marino.',
+            taunt: '¡Desde aquí arriba os veo enanos!',
+            projColor: '#60a5fa',
+            projType: 'mug',
+            style: {
+              skin: '#f0c7b0', hair: '#2d1e17', hairType: 'porri_fade',
+              eyes: '#5c8a7a', facial: 'stache_goatee',
+              torso: 'crewneck', topColor: '#172554', topAccent: '#1e3a8a',
+              pants: '#1f2937', shoes: '#f8fafc', acc: 'none'
+            }
+          },
+		  {
+            id: 'porri_gamba',
+            name: 'Porri Gamba',
+            price: 250,
+            desc: 'Disfraz completo de gamba gigante con capucha, antenas, cuerpo segmentado y cola.',
+            taunt: '¡Cuidado que vengo recién cocido de la costa!',
+            projColor: '#fb7185',
+            projType: 'shrimp',
+            style: {
+              skin: '#f0c7b0', hair: '#fb7185', hairType: 'shrimp_hat',
+              eyes: '#5c8a7a', facial: 'stache_goatee',
+              torso: 'shrimp_suit', topColor: '#fb7185', topAccent: '#f97316',
+              pants: '#f43f5e', shoes: '#fb7185', acc: 'none'
+            }
+          }
+		  
+        ]
+      },
+      {
+        id: 'pedro',
+        name: 'Pedro',
+        tagline: 'Ojos verdosos; del yate al gym, del Madrid a las pistas de Andorra.',
+        heightScale: calcHeight(1.68),
+        widthScale: 1.02,
+        skins: [
+          {
+            id: 'pedro_casual',
+            name: 'Pedro Casual',
+            price: 120,
+            desc: 'Ojos verdosos, polo negro, pelo castaño con degradado, reloj y vaqueros gris claro.',
+            taunt: '¡Recién bajado del yate para tumbarte!',
+            projColor: '#94a3b8',
+            projType: 'orb',
+            style: {
+              skin: '#e8b698', hair: '#543b29', hairType: 'swept_fade',
+              eyes: '#52b788', facial: 'none',
+              torso: 'polo', topColor: '#111827', topAccent: '#1f2937',
+              pants: '#cbd5e1', shoes: '#f8fafc', acc: 'watch'
+            }
+          },
+          {
+            id: 'pedro_madrid',
+            name: 'Pedro Madrid',
+            price: 200,
+            desc: 'Ojos verdosos y equipación blanca del Real Madrid con detalles dorados y azul marino.',
+            taunt: '¡Hasta el final, vamos Real!',
+            projColor: '#fef08a',
+            projType: 'ball_madrid',
+            style: {
+              skin: '#e8b698', hair: '#543b29', hairType: 'swept_fade',
+              eyes: '#52b788', facial: 'none',
+              torso: 'madrid', topColor: '#ffffff', topAccent: '#eab308',
+              pants: '#f8fafc', shoes: '#1e3a8a', acc: 'none'
+            }
+          },
+          {
+            id: 'pedro_fuerte',
+            name: 'Pedro Fuerte',
+            price: 200,
+            desc: 'Ojos verdosos, sin camiseta y súper fuerte: pectorales, abdominales y bíceps enormes.',
+            taunt: '¡Cuidado que te tiro una mancuerna de 40kg!',
+            projColor: '#f43f5e',
+            projType: 'dumbbell',
+            widthOverride: 1.32,
+            style: {
+              skin: '#dfa685', hair: '#543b29', hairType: 'swept_fade',
+              eyes: '#52b788', facial: 'none',
+              torso: 'buff_shirtless', topColor: '#dfa685', topAccent: '#b87d5b',
+              pants: '#1e293b', shoes: '#f8fafc', acc: 'none'
+            }
+          },
+          {
+            id: 'pedro_andorrano',
+            name: 'Pedro Andorrano',
+            price: 200,
+            desc: 'Casco de esquí negro, gafas blancas de ventisca, braga y traje de nieve.',
+            taunt: '¡Bajando pistas negras en Andorra!',
+            projColor: '#bae6fd',
+            projType: 'snowball',
+            style: {
+              skin: '#111827', hair: '#111827', hairType: 'ski_helmet',
+              eyes: '#52b788', facial: 'balaclava',
+              torso: 'ski_suit', topColor: '#111827', topAccent: '#374151',
+              pants: '#1f2937', shoes: '#09090b', acc: 'ski_goggles'
+            }
+          }
+        ]
+      },
+	  {
+        id: 'Marce',
+        name: 'Marce', // <-- Pon aquí su nombre real
+        tagline: 'Pelo rubio con raya en medio, ojos verdes, científico y entrenador Pokémon.',
+        heightScale: calcHeight(1.77),
+        widthScale: 0.96,
+        skins: [
+          {
+            id: 'nuevo_casual',
+            name: 'Casual',
+            price: 120,
+            desc: 'Pelo rubio con raya en medio, ojos verdes, jersey negro de cuello alto y chinos blancos.',
+            taunt: '¡Elegancia y ojos verdes sobre Villamartín!',
+            projColor: '#22c55e',
+            projType: 'orb',
+            style: {
+              skin: '#ebc2a6', hair: '#9e866a', hairType: 'curtains',
+              eyes: '#22c55e', facial: 'stubble',
+              torso: 'turtleneck', topColor: '#0f172a', topAccent: '#1e293b',
+              pants: '#e7e5e4', shoes: '#d6d3d1', acc: 'none'
+            }
+          },
+          {
+            id: 'nuevo_cientifico',
+            name: 'Científico',
+            price: 200,
+            desc: 'Bata blanca de laboratorio, gafas protectoras y matraz verde burbujeante.',
+            taunt: '¡Según mis cálculos no pasas de aquí!',
+            projColor: '#4ade80',
+            projType: 'flask',
+            style: {
+              skin: '#ebc2a6', hair: '#9e866a', hairType: 'curtains',
+              eyes: '#22c55e', facial: 'stubble',
+              torso: 'lab_coat', topColor: '#f8fafc', topAccent: '#38bdf8',
+              pants: '#334155', shoes: '#1e293b', acc: 'lab_flask'
+            }
+          },
+          {
+            id: 'nuevo_pokemon',
+            name: 'Entrenador Pokémon',
+            price: 200,
+            desc: 'Estilo Ash Ketchum: gorra roja y blanca, chaqueta azul, guantes verdes y Pokéball.',
+            taunt: '¡Hazte con todos... menos con la victoria!',
+            projColor: '#ef4444',
+            projType: 'pokeball',
+            style: {
+              skin: '#ebc2a6', hair: '#9e866a', hairType: 'ash_cap',
+              eyes: '#22c55e', facial: 'none',
+              torso: 'ash_jacket', topColor: '#1d4ed8', topAccent: '#ffffff',
+              pants: '#2563eb', shoes: '#ef4444', acc: 'pokeball'
+            }
+          }
+        ]
+      }
+    ];
+
+    const ALL_SKINS = [];
+    const SKIN_MAP = {};
+    const CHAR_MAP = {};
+    CHARACTERS.forEach(ch => {
+      CHAR_MAP[ch.id] = ch;
+      ch.skins.forEach(sk => {
+        const entry = {
+          ...sk,
+          charId: ch.id,
+          heightScale: ch.heightScale,
+          widthScale: sk.widthOverride || ch.widthScale
+        };
+        ALL_SKINS.push(entry);
+        SKIN_MAP[sk.id] = entry;
+      });
+    });
+
+    const JETPACKS = [
+      { id: 'clasico', name: 'Clásico', price: 0, desc: 'Propulsor de toda la vida con llamas naranjas.', color: '#94a3b8', flame: ['#fef08a', '#f97316', '#ef4444'], bonusThrust: 0 },
+      { id: 'hacendado', name: 'Hacendado Turbo', price: 200, desc: 'Doble botella verde con espuma supersónica.', color: '#22c55e', flame: ['#dcfce7', '#4ade80', '#16a34a'], bonusThrust: 1 },
+      { id: 'feria', name: 'Cohete de Feria', price: 350, desc: 'Chispas de fuegos artificiales y farolillos.', color: '#e11d48', flame: ['#fde047', '#ec4899', '#38bdf8'], bonusThrust: 2 },
+      { id: 'sierra', name: 'Plasma Sierra', price: 550, desc: 'Reactor cian y oro de máxima potencia.', color: '#38bdf8', flame: ['#ffffff', '#38bdf8', '#f59e0b'], bonusThrust: 3 }
+    ];
+
+    const UPGRADES = {
+      mercadona: [
+        { id: 'jetControl', name: 'Turbo Combustible', max: 5, baseCost: 80, step: 75, desc: 'Propulsión más estable para esquivar ataques de Jefes.' },
+        { id: 'cannonDmg', name: 'Cañón Auto-Disparo', max: 5, baseCost: 100, step: 90, desc: 'Más daño y ráfagas dobles/triples contra Jefes.' },
+        { id: 'cannonRate', name: 'Cadencia Rápida', max: 5, baseCost: 90, step: 80, desc: 'Dispara automáticamente mucho más rápido.' }
+      ],
+      iglesia: [
+        { id: 'startShield', name: 'Escudo Bendecido', max: 3, baseCost: 120, step: 130, desc: 'Empiezas con escudo (Nv.2+ recarga al vencer Jefes).' },
+        { id: 'revive', name: 'Segunda Oportunidad', max: 1, baseCost: 280, step: 0, desc: 'Un milagro te revive 1 vez por carrera.' },
+        { id: 'luck', name: 'Suerte del Pueblo', max: 5, baseCost: 90, step: 85, desc: 'Más monedas dobles y power-ups frecuentes.' }
+      ],
+      ies: [
+        { id: 'agility', name: 'Agilidad Física', max: 5, baseCost: 80, step: 70, desc: 'Control aéreo más fino al subir y bajar.' },
+        { id: 'magnet', name: 'Imán Natural', max: 5, baseCost: 100, step: 90, desc: 'Atrae monedas cercanas automáticamente.' },
+        { id: 'stride', name: 'Zancada Olímpica', max: 5, baseCost: 90, step: 85, desc: '+12% de monedas totales al final de cada vuelo.' }
+      ]
+    };
+
+    // 3. GUARDADO LOCAL SEGURO
+    const SAVE_KEY = 'villamartin_joyride_explora_v4';
+    function defaultSave() {
+      return {
+        coins: 150,
+        bestDist: 0,
+        bossesDefeated: 0,
+        selectedSkin: 'estandar_casual',
+        unlockedSkins: ['estandar_casual'],
+        selectedJetpack: 'clasico',
+        unlockedJetpacks: ['clasico'],
+        upgrades: {
+          jetControl: 0, cannonDmg: 0, cannonRate: 0,
+          startShield: 0, revive: 0, luck: 0,
+          agility: 0, magnet: 0, stride: 0
+        }
+      };
+    }
+
+    let save = defaultSave();
+    function loadSave() {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          save = {
+            ...defaultSave(),
+            ...parsed,
+            upgrades: { ...defaultSave().upgrades, ...(parsed.upgrades || {}) }
+          };
+          if (!SKIN_MAP[save.selectedSkin]) save.selectedSkin = 'estandar_casual';
+        }
+      } catch (e) {}
+    }
+
+    function persistSave() {
+      try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {}
+      syncGlobalUI();
+      pushCloudSave();
+    }
+
+    function getSkinDisplayName(skinId) {
+      const sk = SKIN_MAP[skinId];
+      if (!sk) return 'Estándar';
+      const cName = CHAR_MAP[sk.charId].name;
+      if (sk.name.toLowerCase().startsWith(cName.toLowerCase())) return sk.name;
+      return cName + ' (' + sk.name + ')';
+    }
+
+    // 4. RENDERIZADOR PIXEL ART DE PERSONAJES Y JETPACKS
+    function drawJetpackSprite(ctx, x, y, scale, jetId, thrusting) {
+      const jp = JETPACKS.find(j => j.id === jetId) || JETPACKS[0];
+      ctx.save();
+      ctx.translate(x, y);
+      const p = scale;
+      ctx.fillStyle = '#1f2937';
+      ctx.fillRect(-10 * p, -5 * p, 6 * p, 12 * p);
+      ctx.fillStyle = jp.color;
+      ctx.fillRect(-9 * p, -4 * p, 4 * p, 10 * p);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-9 * p, 6 * p, 4 * p, 2 * p);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(-4 * p, -3 * p, 2 * p, 2 * p);
+      ctx.fillRect(-4 * p, 3 * p, 2 * p, 2 * p);
+      if (thrusting) {
+        const fH = (6 + Math.random() * 7) * p;
+        ctx.fillStyle = jp.flame[2];
+        ctx.fillRect(-9 * p, 8 * p, 4 * p, fH);
+        ctx.fillStyle = jp.flame[1];
+        ctx.fillRect(-8.5 * p, 8 * p, 3 * p, fH * 0.72);
+        ctx.fillStyle = jp.flame[0];
+        ctx.fillRect(-8 * p, 8 * p, 2 * p, fH * 0.42);
+      }
+      ctx.restore();
+    }
+
+    function drawCharacterSprite(ctx, cx, cy, skinId, opts = {}) {
+      const sk = SKIN_MAP[skinId] || ALL_SKINS[0];
+      const st = sk.style;
+      const baseScale = opts.scale || 2.1;
+      const hScale = sk.heightScale || 1.0;
+      const wScale = sk.widthScale || 1.0;
+      const facingLeft = !!opts.facingLeft;
+      const animT = opts.animT || 0;
+      const moving = opts.moving !== false;
+      const airborne = !!opts.airborne;
+      const thrusting = !!opts.thrusting;
+      const showJetpack = opts.showJetpack !== false;
+      const hitFlash = !!opts.hitFlash;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      if (facingLeft) ctx.scale(-1, 1);
+
+      const px = baseScale * wScale;
+      const py = baseScale * hScale;
+
+      if (airborne && !opts.isBoss) ctx.rotate(thrusting ? -0.1 : 0.08);
+      if (showJetpack) drawJetpackSprite(ctx, -1 * px, -1 * py, baseScale * 0.95, opts.jetpackId || save.selectedJetpack, thrusting);
+
+      const r = (x, y, w, h, color) => {
+        ctx.fillStyle = hitFlash ? '#ffffff' : color;
+        ctx.fillRect(Math.round(x * px), Math.round(y * py), Math.ceil(w * px), Math.ceil(h * py));
+      };
+
+      const legSwing = airborne ? 1.5 : (moving ? Math.sin(animT * 13) * 3.1 : 0);
+      const armSwing = airborne ? -1.4 : (moving ? Math.cos(animT * 13) * 2.4 : 0);
+
+      // Piernas y zapatillas
+      const legTop = 7, legH = 8;
+      r(-3 - legSwing * 0.35, legTop, 3.5, legH, st.pants);
+      r(-3.5 - legSwing * 0.35, legTop + legH - 1, 4.5, 2.5, st.shoes);
+      r(0.5 + legSwing * 0.35, legTop, 3.5, legH, st.pants);
+      r(0.5 + legSwing * 0.35, legTop + legH - 1, 4.5, 2.5, st.shoes);
+
+      if (st.plaidPants && !hitFlash) {
+        r(-2.5 - legSwing * 0.35, legTop + 2, 1, 5, '#422006');
+        r(1.5 + legSwing * 0.35, legTop + 2, 1, 5, '#422006');
+        r(-3 - legSwing * 0.35, legTop + 4, 3.5, 1, '#a16207');
+        r(0.5 + legSwing * 0.35, legTop + 4, 3.5, 1, '#a16207');
+      }
+
+      // Falda tutú naranja (Buti Disfraz)
+      if (st.skirt) {
+        r(-6.5, 5.5, 14, 4.5, st.skirt);
+        r(-7.5, 7.5, 16, 3.0, '#fb923c');
+        r(-5.5, 6.5, 2, 3.5, '#ea580c');
+        r(0, 6.5, 2, 3.5, '#ea580c');
+        r(4.5, 6.5, 2, 3.5, '#ea580c');
+      }
+	  // Culazo al aire + medias de España (Lara Culón)
+      if (st.bigButt) {
+        if (!hitFlash) {
+          r(-3 - legSwing * 0.35, legTop + 4.2, 3.5, 3.0, '#1e3a8a');
+          r(-3 - legSwing * 0.35, legTop + 4.2, 3.5, 0.9, '#facc15');
+          r(0.5 + legSwing * 0.35, legTop + 4.2, 3.5, 3.0, '#1e3a8a');
+          r(0.5 + legSwing * 0.35, legTop + 4.2, 3.5, 0.9, '#facc15');
+        }
+        r(-7.6, 5.2, 6.4, 5.8, st.skin);
+        r(-9.4, 6.1, 3.2, 4.2, st.skin);
+        if (!hitFlash) {
+          r(-8.4, 9.8, 5.8, 1.6, '#b87654'); // sombra inferior
+          r(-6.8, 6.6, 1.0, 3.4, '#a66544'); // línea divisoria
+          r(-8.4, 6.4, 1.8, 1.4, '#f0bda0'); // brillo
+        }
+      }
+
+      // Torso
+      const torsoW = st.torso === 'buff_shirtless' ? 11.5 : 9.5;
+      const torsoX = -torsoW / 2 + 0.5;
+      r(torsoX, -4, torsoW, 11.5, st.topColor);
+
+      if (!hitFlash) {
+        if (st.torso === 'hoodie') {
+          r(torsoX + 1, -4, torsoW - 2, 2, st.topAccent);
+          r(torsoX + 2, 3, torsoW - 4, 3.5, '#631313');
+          r(1, -2, 0.8, 3.5, '#e2e8f0');
+          r(3, -2, 0.8, 3.5, '#e2e8f0');
+		} else if (st.torso === 'spain_jersey') {
+          r(torsoX, -4, torsoW, 11.5, '#dc2626');               // rojo España
+          r(torsoX + 1, -4.5, torsoW - 2, 1.5, '#facc15');      // cuello amarillo
+          r(torsoX, -3.5, 1.2, 11.0, '#facc15');                // franja amarilla
+          r(torsoX + torsoW - 1.2, -3.5, 1.2, 11.0, '#1e3a8a'); // detalle azul marino
+          r(torsoX + 5.6, -1.6, 2.0, 2.2, '#facc15');           // escudo dorado
+        } else if (st.torso === 'bomber') {
+          r(0.2, -3.5, 3.6, 11, st.topAccent);
+          r(torsoX, -4, torsoW, 1.5, '#0f172a');
+        } else if (st.torso === 'smoothie_hoodie') {
+          r(torsoX, -4, torsoW, 1.5, '#e2e8f0');
+          r(0.5, -2.5, 0.7, 4, '#cbd5e1');
+          r(2.5, -2.5, 0.7, 4, '#cbd5e1');
+          r(2, -1, 3, 3, '#4ade80');
+          r(2.5, 0.5, 2, 1.2, '#ec4899');
+        } else if (st.torso === 'carnaval_track') {
+          r(torsoX, -4, torsoW, 3.5, '#4d6b34');
+          r(torsoX + 1.5, -4, 1.4, 11.5, st.zipColor || '#d9f99d');
+          r(torsoX + torsoW - 2.2, -3, 2.2, 10, st.topAccent);
+        } else if (st.torso === 'polo') {
+          r(torsoX + 1, -4.5, torsoW - 2, 2, st.topAccent);
+          r(1.5, -2.5, 1.2, 3, st.topAccent);
+        } else if (st.torso === 'puffer_vest') {
+          r(torsoX + 1.5, -4.5, torsoW - 3, 2, st.topAccent);
+          for (let qy = -2; qy <= 5; qy += 2.2) r(torsoX, qy, torsoW, 0.8, '#2d2c25');
+          r(1.2, -4, 0.9, 11.5, '#1c1917');
+        } else if (st.torso === 'cani_track') {
+          r(torsoX + 0.5, -3.5, 1.2, 11, '#facc15');
+          r(torsoX + torsoW - 1.7, -3.5, 1.2, 11, '#facc15');
+          r(-1, -3.5, 5, 1.2, '#fde047');
+          r(0, -2.3, 3, 1.2, '#f59e0b');
+          for (let i = 0; i < 6; i++) r(torsoX + i * 1.4, -3 + i * 1.4, 2, 1.6, '#dc2626');
+        } else if (st.torso === 'betis') {
+          r(torsoX, -4, 2.2, 11.5, '#ffffff');
+          r(torsoX + 2.2, -4, 2.2, 11.5, '#16a34a');
+          r(torsoX + 4.4, -4, 2.2, 11.5, '#ffffff');
+          r(torsoX + 6.6, -4, 2.9, 11.5, '#16a34a');
+          r(torsoX + 1, -4.5, torsoW - 2, 1.5, '#15803d');
+        } else if (st.torso === 'barca') {
+          r(torsoX, -4, 2.3, 11.5, '#1d4ed8');
+          r(torsoX + 2.3, -4, 2.3, 11.5, '#991b1b');
+          r(torsoX + 4.6, -4, 2.3, 11.5, '#1d4ed8');
+          r(torsoX + 6.9, -4, 2.6, 11.5, '#991b1b');
+          r(torsoX + 1, -4.5, torsoW - 2, 1.4, '#facc15');
+          r(torsoX + 5.8, -1.6, 1.8, 1.8, '#facc15');
+        } else if (st.torso === 'madrid') {
+          r(torsoX, -4, torsoW, 1.5, '#eab308');
+          r(torsoX + 6, -1.5, 1.8, 2, '#1e3a8a');
+          r(torsoX + 2, 1.5, 5.5, 1.3, '#1e293b');
+        } else if (st.torso === 'shrek_vest') {
+          r(torsoX + 2.2, -4, torsoW - 4.4, 11.5, '#f8fafc');
+          r(torsoX, -4, 3, 9.5, '#5c3a21');
+          r(torsoX + torsoW - 3, -4, 3, 9.5, '#5c3a21');
+          r(0.5, -1, 2, 0.8, '#29170b');
+          r(0.5, 1, 2, 0.8, '#29170b');
+        } else if (st.torso === 'lifeguard') {
+          r(1, -1, 3.2, 1.2, '#ffffff');
+          r(2, -2, 1.2, 3.2, '#ffffff');
+          r(2.2, -4, 0.8, 2, '#fde047');
+        } else if (st.torso === 'buff_shirtless') {
+          r(torsoX + 1, -2.5, 4, 3, '#c88d6b');
+          r(torsoX + 6.2, -2.5, 4, 3, '#c88d6b');
+          r(torsoX + 1.5, -2.5, 3, 2, '#eab696');
+          r(torsoX + 6.7, -2.5, 3, 2, '#eab696');
+          for (let row = 0; row < 3; row++) {
+            r(torsoX + 2.4, 1.2 + row * 1.9, 2.8, 1.3, '#bd815e');
+            r(torsoX + 6.0, 1.2 + row * 1.9, 2.8, 1.3, '#bd815e');
+          }
+        } else if (st.torso === 'ski_suit') {
+          r(torsoX, -4, torsoW, 11.5, '#111827');
+          r(torsoX + 1, -4, torsoW - 2, 1.8, '#1f2937');
+          r(1.5, -3, 0.9, 10, '#4b5563');
+        } else if (st.torso === 'crewneck') {
+          r(torsoX + 1, -4.5, torsoW - 2, 1.8, st.topAccent);
+          r(torsoX + 5.5, -1.5, 1.4, 1.4, '#e2e8f0');
+		} else if (st.torso === 'turtleneck') {
+          r(torsoX + 1.5, -5.6, torsoW - 3, 2.2, '#09090b'); // cuello alto negro
+          r(torsoX + 1, -3, torsoW - 2, 10, '#111827');
+        } else if (st.torso === 'lab_coat') {
+          r(torsoX + 2.6, -4, torsoW - 5.2, 11, '#38bdf8'); // camisa azul interior
+          r(torsoX + 4.1, -3.5, 1.3, 6.5, '#1e3a8a');      // corbata
+          r(torsoX, -4, 3.0, 13.5, '#f8fafc');              // solapa bata izq
+          r(torsoX + torsoW - 3.0, -4, 3.0, 13.5, '#f8fafc'); // solapa bata der
+          r(torsoX + 0.5, 2.5, 2.0, 2.0, '#cbd5e1');        // bolsillo bata
+        } else if (st.torso === 'ash_jacket') {
+          r(torsoX + 2.8, -4, torsoW - 5.6, 11.5, '#111827'); // camiseta negra interior
+          r(torsoX, -4, 3.2, 11.5, '#1d4ed8');                // chaqueta azul izq
+          r(torsoX + torsoW - 3.2, -4, 3.2, 11.5, '#1d4ed8'); // chaqueta azul der
+          r(torsoX, -4.4, torsoW, 1.5, '#ffffff');            // cuello blanco
+          r(torsoX, 6.2, torsoW, 1.3, '#ffffff');             // borde inferior blanco
+          r(torsoX + 0.8, 1.5, 1.5, 1.5, '#facc15');          // botón dorado
+        } else if (st.torso === 'shrimp_suit') {
+          // Segmentos de caparazón de gamba + cola trasera curva
+          r(torsoX - 1, -4, torsoW + 2, 12.5, '#fb7185');
+          for (let sy = -2; sy <= 6; sy += 2.6) {
+            r(torsoX - 1, sy, torsoW + 2, 1.0, '#f97316');
+          }
+          r(torsoX - 5.5, 4.5, 5.0, 3.2, '#fb7185'); // base de la cola
+          r(torsoX - 8.2, 2.5, 3.6, 3.2, '#f43f5e'); // aleta cola superior
+          r(torsoX - 8.2, 6.2, 3.6, 2.6, '#fb923c'); // aleta cola inferior
+        } else if (st.torso === 'lawyer_suit') {
+          r(torsoX, -4, torsoW, 11.5, '#1e293b');              // americana oscura
+          r(torsoX + 2.8, -4.2, torsoW - 5.6, 5.2, '#ffffff'); // camisa blanca en V
+          r(torsoX + 4.1, -3.5, 1.3, 6.4, st.topAccent);       // corbata amarilla
+          r(torsoX + 2.0, -3.8, 1.0, 5.5, '#0f172a');          // solapa izq
+          r(torsoX + torsoW - 3.0, -3.8, 1.0, 5.5, '#0f172a'); // solapa der
+          r(torsoX + 4.3, 4.2, 1.0, 1.0, '#94a3b8');           // botón
+        } else if (st.torso === 'math_outfit') {
+          r(torsoX, -4, torsoW, 11.5, st.topColor);            // jersey marino
+          r(torsoX + 2.6, -4.4, torsoW - 5.2, 2.2, '#ffffff'); // cuello de camisa
+          // Símbolo π dorado en el pecho
+          r(torsoX + 2.2, -0.6, 5.2, 1.1, '#facc15');
+          r(torsoX + 3.0, 0.5, 1.1, 3.6, '#facc15');
+          r(torsoX + 5.3, 0.5, 1.1, 3.6, '#facc15');
+        }
+      }
+
+      // Brazos y accesorios
+      // Brazos y accesorios
+      let sleeveColor = st.topColor;
+      if (st.torso === 'puffer_vest') sleeveColor = st.topAccent;
+      else if (st.torso === 'carnaval_track') sleeveColor = '#e7e5c5';
+      else if (st.torso === 'shrek_vest' || st.torso === 'lab_coat') sleeveColor = '#f8fafc';
+      else if (st.torso === 'buff_shirtless' || st.torso === 'lifeguard') sleeveColor = st.skin;
+
+      const armW = st.torso === 'buff_shirtless' ? 3.8 : 2.8;
+      r(torsoX + torsoW - 2.2, -2.5 + armSwing * 0.2, armW, 5, sleeveColor);
+      const shortSleeve = ['polo', 'betis', 'barca', 'madrid', 'lifeguard', 'buff_shirtless', 'ash_jacket', 'cani_street', 'spain_jersey'].includes(st.torso);
+      r(torsoX + torsoW - 1.8, 2 + armSwing * 0.2, armW * 0.85, 3.8, shortSleeve ? st.skin : sleeveColor);
+      const handCol = st.torso === 'ski_suit' ? '#09090b' : (st.torso === 'ash_jacket' ? '#16a34a' : st.skin);
+      r(torsoX + torsoW - 1.6, 5.2 + armSwing * 0.2, 2.5, 2.2, handCol);
+
+      if (st.acc === 'watch' && !hitFlash) r(torsoX + torsoW - 1.8, 4.4 + armSwing * 0.2, 2.6, 1.1, '#cbd5e1');
+      if (st.acc === 'lifeguard_gear' && !hitFlash) {
+        r(torsoX + torsoW + 0.4, 3 + armSwing * 0.2, 5.5, 2.6, '#f97316');
+        r(torsoX + torsoW + 1.8, 3.5 + armSwing * 0.2, 2.5, 1.5, '#fdba74');
+      }
+      if (st.acc === 'lab_flask' && !hitFlash) {
+        // Matraz de laboratorio con líquido verde
+        r(torsoX + torsoW + 0.2, 2.8 + armSwing * 0.2, 1.6, 2.0, '#e2e8f0');
+        r(torsoX + torsoW - 0.5, 4.6 + armSwing * 0.2, 3.2, 3.0, '#e2e8f0');
+        r(torsoX + torsoW - 0.2, 5.6 + armSwing * 0.2, 2.6, 1.8, '#4ade80');
+      }
+      if (st.acc === 'pokeball' && !hitFlash) {
+        // Pokéball en la mano
+        r(torsoX + torsoW + 0.2, 3.6 + armSwing * 0.2, 3.4, 1.7, '#ef4444');
+        r(torsoX + torsoW + 0.2, 5.3 + armSwing * 0.2, 3.4, 1.7, '#ffffff');
+        r(torsoX + torsoW + 0.2, 5.0 + armSwing * 0.2, 3.4, 0.7, '#111827');
+        r(torsoX + torsoW + 1.4, 4.8 + armSwing * 0.2, 1.1, 1.1, '#ffffff');
+      }
+	  if (st.acc === 'briefcase' && !hitFlash) {
+        // Maletín de abogado
+        r(torsoX + torsoW - 0.6, 6.2 + armSwing * 0.2, 5.6, 4.2, '#78350f');
+        r(torsoX + torsoW + 1.0, 5.2 + armSwing * 0.2, 2.4, 1.0, '#451a03'); // asa
+        r(torsoX + torsoW + 1.7, 7.6 + armSwing * 0.2, 1.0, 1.0, '#facc15'); // cierre dorado
+      }
+      if (st.acc === 'math_gear' && !hitFlash) {
+        // Mini pizarra / libreta de cálculos en la mano
+        r(torsoX + torsoW - 0.2, 3.6 + armSwing * 0.2, 4.6, 3.8, '#065f46');
+        r(torsoX + torsoW + 0.4, 4.4 + armSwing * 0.2, 3.2, 0.7, '#ffffff');
+        r(torsoX + torsoW + 0.4, 5.8 + armSwing * 0.2, 2.2, 0.7, '#fde047');
+      }
+      if (st.cane && !hitFlash) {
+        r(torsoX + torsoW - 0.5, 5.5 + armSwing * 0.2, 1.2, 11.5, '#09090b');
+        r(torsoX + torsoW - 1.2, 5.2 + armSwing * 0.2, 2.8, 1.2, '#334155');
+      }
+	  
+      // Cabeza y ojos
+      const headX = -3.8, headY = -13.5, headW = 8.6, headH = 9.0;
+      r(-1.2, -5.2, 3.2, 1.8, st.skin);
+      r(headX, headY, headW, headH, st.skin);
+
+      if (!hitFlash && !['ski_goggles', 'dark_shades', 'green_shades', 'cani_pack'].includes(st.acc)) {
+        r(headX + 4.1, headY + 3.2, 2.3, 1.9, '#ffffff');
+        r(headX + 4.8, headY + 3.3, 1.5, 1.7, st.eyes);
+        r(headX + 3.9, headY + 2.1, 2.8, 0.9, st.hair === '#111827' ? '#222' : st.hair);
+      }
+
+      if (!hitFlash) {
+        if (st.facial === 'goatee') {
+          r(headX + 4.8, headY + 7.4, 2.7, 1.5, st.hair);
+        } else if (st.facial === 'juan_goatee') {
+          r(headX + 5.2, headY + 6.1, 2.4, 0.7, '#6b4f3d');
+          r(headX + 4.6, headY + 7.3, 3.1, 1.8, st.hair);
+        } else if (st.facial === 'stache_goatee') {
+          r(headX + 5.2, headY + 6.0, 2.8, 0.9, st.hair);
+          r(headX + 5.0, headY + 7.6, 2.6, 1.4, st.hair);
+        } else if (st.facial === 'full_beard') {
+          r(headX + 1.5, headY + 5.8, 6.8, 3.2, st.hair);
+          r(headX + 5.2, headY + 5.3, 3.1, 1.2, st.hair);
+        } else if (st.facial === 'green_beard') {
+          r(headX + 2.0, headY + 6.5, 6.2, 2.5, '#3f8a27');
+        } else if (st.facial === 'stubble') {
+          r(headX + 2.5, headY + 6.8, 5.5, 2.0, '#7c5c4a');
+        } else if (st.facial === 'balaclava') {
+          r(headX, headY + 4.2, headW, 5.2, '#09090b');
+        }
+      }
+
+      // Pelo / Gorro / Casco
+      if (st.hairType === 'curly') {
+        r(headX - 1.2, headY - 2.6, headW + 2.6, 4.4, st.hair);
+        r(headX - 1.8, headY - 1.0, 3.0, 4.2, st.hair);
+        r(headX + 1.2, headY - 3.6, 6.0, 2.2, st.hair);
+        if (!hitFlash) {
+          r(headX + 0.5, headY - 2.2, 2.1, 1.2, '#5c3d2b');
+          r(headX + 4.2, headY - 2.6, 2.2, 1.2, '#5c3d2b');
+        }
+      } else if (st.hairType === 'blunt') {
+        r(headX - 0.5, headY - 1.6, headW + 1.4, 3.6, st.hair);
+        r(headX - 0.6, headY + 1.5, 2.2, 2.4, '#47362e');
+      } else if (st.hairType === 'thick_bangs') {
+        r(headX - 1.0, headY - 2.4, headW + 2.4, 4.6, st.hair);
+        r(headX - 0.8, headY + 1.8, 2.4, 2.2, st.hair);
+      } else if (st.hairType === 'fade_short' || st.hairType === 'short_fade') {
+        r(headX - 0.4, headY - 1.8, headW + 1.0, 3.2, st.hair);
+        r(headX - 0.4, headY + 1.2, 2.0, 2.0, '#5a4337');
+      } else if (st.hairType === 'porri_fade') {
+        r(headX - 0.4, headY - 2.0, headW + 1.0, 3.2, st.hair);
+        r(headX + 1.0, headY - 2.8, 5.5, 1.4, st.hair);
+      } else if (st.hairType === 'swept_fade') {
+        r(headX - 0.5, headY - 2.0, headW + 1.6, 3.6, st.hair);
+        r(headX + 3.0, headY - 2.6, 5.4, 1.8, '#6e4e37');
+      } else if (st.hairType === 'shrek_hat') {
+        r(headX - 1.2, headY - 2.5, headW + 2.4, 4.2, '#b5cc2e');
+        r(headX - 1.4, headY + 1.0, 2.2, 6.5, '#b5cc2e');
+        r(headX - 4.2, headY - 1.4, 3.2, 2.0, '#c6db3d');
+        r(headX + headW + 0.8, headY - 1.4, 3.2, 2.0, '#c6db3d');
+        r(headX + 1.0, headY + 1.0, 6.2, 1.2, '#221610');
+      } else if (st.hairType === 'ski_helmet') {
+        r(headX - 1.2, headY - 2.8, headW + 2.4, 5.6, '#111827');
+        if (!hitFlash) r(headX + 0.5, headY - 1.8, 5.0, 1.0, '#374151');
+	  } else if (st.hairType === 'curtains') {
+        // Peinado rubio ceniza con raya en medio y volumen
+        r(headX - 1.2, headY - 2.4, headW + 2.4, 4.0, st.hair);
+        r(headX - 1.6, headY + 0.6, 3.4, 3.2, st.hair);
+        r(headX + headW - 1.4, headY + 0.4, 3.0, 2.8, st.hair);
+        if (!hitFlash) {
+          r(headX + 3.8, headY - 2.2, 1.0, 3.8, '#6e5a44'); // raya en medio
+          r(headX + 0.6, headY - 1.8, 2.4, 1.2, '#c2ad91'); // brillo rubio
+          r(headX + 5.6, headY - 1.8, 2.2, 1.2, '#c2ad91');
+        }
+      } else if (st.hairType === 'shrimp_hat') {
+        // Capucha de gamba con antenas largas y ojitos negros arriba
+        r(headX - 1.6, headY - 3.2, headW + 3.2, 4.6, '#fb7185');
+        r(headX - 1.8, headY + 1.0, 2.2, 7.6, '#fb7185');
+        if (!hitFlash) {
+          r(headX + 5.6, headY - 2.4, 1.6, 1.6, '#09090b'); // ojo de la gamba
+          r(headX + 6.0, headY - 2.2, 0.6, 0.6, '#ffffff');
+          // Dos antenas largas de gamba
+          r(headX + 3.0, headY - 7.0, 1.0, 4.0, '#fda4af');
+          r(headX + 4.0, headY - 7.8, 3.6, 1.0, '#fda4af');
+          r(headX + 6.2, headY - 6.0, 1.0, 3.2, '#fb7185');
+          r(headX + 7.2, headY - 6.8, 3.2, 1.0, '#fb7185');
+        }
+      } else if (st.hairType === 'ash_cap') {
+        // Gorra icónica de Ash Ketchum (roja + frente blanco + logo verde)
+        r(headX - 1.0, headY + 0.8, 2.6, 2.8, st.hair);    // pelo asomando atrás
+        r(headX - 1.0, headY - 2.8, headW + 2.0, 4.0, '#dc2626');
+        r(headX + 3.2, headY - 2.6, 5.2, 3.6, '#ffffff');  // panel frontal blanco
+        r(headX + 2.0, headY + 0.4, headW + 2.8, 1.3, '#dc2626'); // visera roja
+        if (!hitFlash) r(headX + 4.8, headY - 1.6, 2.2, 1.6, '#16a34a'); // símbolo verde
+      } else if (st.hairType === 'backwards_cap') {
+        // Gorra hacia atrás (Ricardo Cani)
+        r(headX - 0.8, headY - 2.6, headW + 1.6, 3.8, '#111827');
+        r(headX - 4.0, headY + 0.2, 3.8, 1.3, '#ef4444'); // visera hacia atrás
+        if (!hitFlash) r(headX + 1.0, headY - 1.6, 4.0, 1.0, '#facc15');
+      }
+
+      // Gafas
+      if (!hitFlash) {
+        if (st.acc === 'green_shades') {
+          r(headX + 3.2, headY + 2.8, 5.6, 2.1, '#94a3b8');
+          r(headX + 3.8, headY + 3.1, 4.4, 1.4, '#6ee7b7');
+        } else if (st.acc === 'dark_shades') {
+          r(headX + 3.0, headY + 2.5, 5.8, 2.7, '#09090b');
+          r(headX + 4.0, headY + 2.9, 1.5, 0.8, '#475569');
+        } else if (st.acc === 'cani_pack') {
+          r(headX + 3.0, headY + 2.6, 6.0, 2.4, '#facc15');
+          r(headX + 3.6, headY + 3.0, 4.8, 1.6, '#111827');
+        } else if (st.acc === 'ski_goggles') {
+          r(headX - 1.0, headY + 2.2, headW + 2.2, 2.2, '#cbd5e1');
+          r(headX + 3.0, headY + 1.8, 6.2, 3.6, '#ffffff');
+          r(headX + 3.8, headY + 2.4, 4.6, 2.4, '#0f172a');
+          r(headX + 4.4, headY + 2.7, 2.0, 0.9, '#38bdf8');
+		} else if (st.acc === 'lab_flask') {
+          // Montura de gafas transparentes de científico
+          r(headX + 3.4, headY + 2.8, 3.6, 0.6, '#cbd5e1');
+          r(headX + 3.4, headY + 5.1, 3.6, 0.6, '#cbd5e1');
+          r(headX + 3.4, headY + 2.8, 0.6, 2.8, '#cbd5e1');
+          r(headX + 6.5, headY + 2.8, 0.6, 2.8, '#cbd5e1');
+		} else if (st.acc === 'math_gear') {
+          // Gafas de pasta fina dejando ver sus ojos azules
+          r(headX + 3.6, headY + 2.8, 3.4, 0.5, '#0f172a');
+          r(headX + 3.6, headY + 5.1, 3.4, 0.5, '#0f172a');
+          r(headX + 3.6, headY + 2.8, 0.5, 2.8, '#0f172a');
+          r(headX + 6.5, headY + 2.8, 0.5, 2.8, '#0f172a');
+        }
+      }
+
+      ctx.restore();
+    }
+
+    // 5. MAPA EXPLORABLE DE VILLAMARTÍN
+    const hubCanvas = document.getElementById('hub-canvas');
+    const hCtx = hubCanvas.getContext('2d');
+    const gameCanvas = document.getElementById('game-canvas');
+    const gCtx = gameCanvas.getContext('2d');
+    const W = 960, H = 540;
+
+    let appMode = 'hub';
+    const HUB_PLACES = [
+      { id: 'porri', label: 'BAR PORRI', sub: 'Skins & Pandilla', x: 56, y: 120, w: 170, h: 120, doorX: 141, doorY: 266 },
+      { id: 'iglesia', label: 'IGLESIA STA. MARÍA', sub: 'Bendiciones', x: 270, y: 74, w: 185, h: 166, doorX: 362, doorY: 266 },
+      { id: 'mercadona', label: 'MERCADONA', sub: 'Jetpacks & Cañón', x: 500, y: 112, w: 190, h: 128, doorX: 595, doorY: 266 },
+      { id: 'ies', label: 'IES MATRERA / POLI', sub: 'Entrenamiento', x: 730, y: 112, w: 180, h: 128, doorX: 820, doorY: 266 },
+      { id: 'arco', label: 'ARCO SALIDA', sub: 'Despegar a volar', x: 390, y: 400, w: 180, h: 92, doorX: 480, doorY: 420 }
+    ];
+
+    const walker = { x: 480, y: 332, facingLeft: false, animT: 0, moving: false, target: null, targetPlace: null };
+    const keys = { left: false, right: false, up: false, down: false };
+    let hubTime = 0, nearbyPlace = null;
+
+    function walkToPlace(placeId) {
+      const pl = HUB_PLACES.find(p => p.id === placeId);
+      if (!pl) return;
+      AudioSys.click();
+      walker.target = { x: pl.doorX, y: pl.doorY };
+      walker.targetPlace = pl.id;
+    }
+
+    function interactPlace(placeId) {
+      if (placeId === 'arco') startRun();
+      else openShopModal(placeId);
+    }
+
+    function updateHub(dt) {
+      hubTime += dt;
+      let vx = 0, vy = 0;
+      if (keys.left) vx -= 1;
+      if (keys.right) vx += 1;
+      if (keys.up) vy -= 1;
+      if (keys.down) vy += 1;
+
+      const speed = 225;
+      if (vx !== 0 || vy !== 0) {
+        walker.target = null;
+        walker.targetPlace = null;
+        const len = Math.hypot(vx, vy);
+        walker.x += (vx / len) * speed * dt;
+        walker.y += (vy / len) * speed * dt;
+        if (vx < 0) walker.facingLeft = true;
+        else if (vx > 0) walker.facingLeft = false;
+        walker.moving = true;
+        walker.animT += dt;
+      } else if (walker.target) {
+        const dx = walker.target.x - walker.x, dy = walker.target.y - walker.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 8) {
+          walker.x = walker.target.x;
+          walker.y = walker.target.y;
+          const dest = walker.targetPlace;
+          walker.target = null;
+          walker.targetPlace = null;
+          walker.moving = false;
+          if (dest) interactPlace(dest);
+        } else {
+          walker.x += (dx / d) * speed * 1.15 * dt;
+          walker.y += (dy / d) * speed * 1.15 * dt;
+          if (Math.abs(dx) > 2) walker.facingLeft = dx < 0;
+          walker.moving = true;
+          walker.animT += dt;
+        }
+      } else {
+        walker.moving = false;
+      }
+
+      walker.x = Math.max(42, Math.min(W - 42, walker.x));
+      walker.y = Math.max(254, Math.min(486, walker.y));
+
+      let found = null, bestDist = 70;
+      HUB_PLACES.forEach(pl => {
+        const d = Math.hypot(walker.x - pl.doorX, walker.y - pl.doorY);
+        if (d < bestDist) { bestDist = d; found = pl; }
+      });
+      nearbyPlace = found;
+
+      const hintEl = document.getElementById('hub-nearby');
+      const btnInt = document.getElementById('btn-hub-interact');
+      if (nearbyPlace) {
+        hintEl.textContent = 'Puerta de ' + nearbyPlace.label + ' — Pulsa ENTRAR / E / ESPACIO';
+        hintEl.style.color = '#facc15';
+        btnInt.disabled = false;
+      } else {
+        hintEl.textContent = 'Camina con WASD/Flechas o haz clic en un edificio';
+        hintEl.style.color = '#4ade80';
+        btnInt.disabled = true;
+      }
+    }
+
+    function drawHub() {
+      const grad = hCtx.createLinearGradient(0, 0, 0, 260);
+      grad.addColorStop(0, '#1e1b4b');
+      grad.addColorStop(0.55, '#6d28d9');
+      grad.addColorStop(1, '#ea580c');
+      hCtx.fillStyle = grad;
+      hCtx.fillRect(0, 0, W, 260);
+
+      hCtx.fillStyle = '#fde047';
+      hCtx.fillRect(42, 22, 36, 36);
+
+      hCtx.fillStyle = '#3b1d5e';
+      hCtx.beginPath();
+      hCtx.moveTo(0, 240); hCtx.lineTo(140, 120); hCtx.lineTo(310, 175); hCtx.lineTo(480, 95);
+      hCtx.lineTo(660, 165); hCtx.lineTo(830, 108); hCtx.lineTo(960, 160); hCtx.lineTo(960, 250); hCtx.lineTo(0, 250);
+      hCtx.closePath();
+      hCtx.fill();
+
+      hCtx.fillStyle = '#d6c7a9';
+      hCtx.fillRect(0, 236, W, 56);
+      hCtx.fillStyle = '#3b3354';
+      hCtx.fillRect(0, 292, W, H - 292);
+      hCtx.fillStyle = '#4c416b';
+      for (let x = 24; x < W; x += 64) {
+        hCtx.fillRect(x, 316, 32, 10);
+        hCtx.fillRect(x + 28, 356, 32, 10);
+      }
+      hCtx.fillStyle = '#facc15';
+      for (let y = 300; y < 410; y += 22) hCtx.fillRect(W / 2 - 4, y, 8, 12);
+
+      const lCols = ['#ef4444', '#22c55e', '#facc15', '#38bdf8', '#f97316', '#ffffff'];
+      hCtx.strokeStyle = '#140f22';
+      hCtx.lineWidth = 2;
+      hCtx.beginPath();
+      hCtx.moveTo(0, 32);
+      hCtx.quadraticCurveTo(W / 2, 74, W, 32);
+      hCtx.stroke();
+      for (let i = 1; i < 16; i++) {
+        const t = i / 16;
+        hCtx.fillStyle = lCols[i % lCols.length];
+        hCtx.fillRect(t * W - 5, 32 + 4 * t * (1 - t) * 42, 10, 12);
+      }
+
+      HUB_PLACES.forEach(pl => {
+        const isNear = nearbyPlace && nearbyPlace.id === pl.id;
+        if (pl.id === 'porri') {
+          hCtx.fillStyle = '#fef3c7'; hCtx.fillRect(pl.x, pl.y + 18, pl.w, pl.h - 18);
+          hCtx.fillStyle = '#b45309'; hCtx.fillRect(pl.x - 6, pl.y + 8, pl.w + 12, 14);
+          for (let i = 0; i < 8; i++) {
+            hCtx.fillStyle = i % 2 === 0 ? '#15803d' : '#ffffff';
+            hCtx.fillRect(pl.x + 6 + i * 20, pl.y + 46, 20, 14);
+          }
+          hCtx.fillStyle = '#78350f'; hCtx.fillRect(pl.x + 16, pl.y + 24, pl.w - 32, 20);
+          hCtx.fillStyle = '#fde047'; hCtx.font = 'bold 11px Courier New'; hCtx.textAlign = 'center';
+          hCtx.fillText('BAR PORRI', pl.x + pl.w / 2, pl.y + 38);
+          hCtx.fillStyle = '#451a03'; hCtx.fillRect(pl.x + 66, pl.y + 72, 38, 48);
+          hCtx.fillStyle = '#fbbf24'; hCtx.fillRect(pl.x + 14, pl.y + 72, 40, 28); hCtx.fillRect(pl.x + 116, pl.y + 72, 40, 28);
+        } else if (pl.id === 'iglesia') {
+          hCtx.fillStyle = '#f8fafc'; hCtx.fillRect(pl.x + 12, pl.y + 66, pl.w - 24, pl.h - 66);
+          hCtx.fillStyle = '#e2e8f0'; hCtx.fillRect(pl.x + 56, pl.y + 16, 72, 66);
+          hCtx.fillStyle = '#b45309'; hCtx.fillRect(pl.x + 50, pl.y + 10, 84, 10);
+          hCtx.fillStyle = '#facc15'; hCtx.fillRect(pl.x + 89, pl.y - 10, 6, 20); hCtx.fillRect(pl.x + 82, pl.y - 3, 20, 6);
+          hCtx.fillStyle = '#334155'; hCtx.fillRect(pl.x + 68, pl.y + 32, 18, 24); hCtx.fillRect(pl.x + 98, pl.y + 32, 18, 24);
+          hCtx.fillStyle = '#78350f'; hCtx.fillRect(pl.x + 68, pl.y + 108, 48, 58);
+          hCtx.fillStyle = '#38bdf8'; hCtx.fillRect(pl.x + 80, pl.y + 78, 24, 22);
+        } else if (pl.id === 'mercadona') {
+          hCtx.fillStyle = '#f8fafc'; hCtx.fillRect(pl.x, pl.y + 20, pl.w, pl.h - 20);
+          hCtx.fillStyle = '#15803d'; hCtx.fillRect(pl.x - 4, pl.y + 8, pl.w + 8, 28);
+          hCtx.fillStyle = '#f97316'; hCtx.fillRect(pl.x - 4, pl.y + 36, pl.w + 8, 6);
+          hCtx.fillStyle = '#ffffff'; hCtx.font = 'bold 13px Courier New'; hCtx.textAlign = 'center';
+          hCtx.fillText('MERCADONA', pl.x + pl.w / 2, pl.y + 27);
+          hCtx.fillStyle = '#38bdf8'; hCtx.fillRect(pl.x + 48, pl.y + 66, 94, 62);
+          hCtx.fillStyle = '#0f172a'; hCtx.fillRect(pl.x + 94, pl.y + 66, 3, 62);
+        } else if (pl.id === 'ies') {
+          hCtx.fillStyle = '#fed7aa'; hCtx.fillRect(pl.x, pl.y + 22, pl.w, pl.h - 22);
+          hCtx.fillStyle = '#9a3412'; hCtx.fillRect(pl.x - 5, pl.y + 8, pl.w + 10, 22);
+          hCtx.fillStyle = '#fef08a'; hCtx.font = 'bold 11px Courier New'; hCtx.textAlign = 'center';
+          hCtx.fillText('IES MATRERA / POLI', pl.x + pl.w / 2, pl.y + 23);
+          hCtx.fillStyle = '#0284c7'; hCtx.fillRect(pl.x + 16, pl.y + 44, 42, 30); hCtx.fillRect(pl.x + 122, pl.y + 44, 42, 30);
+          hCtx.fillStyle = '#16a34a'; hCtx.fillRect(pl.x + 68, pl.y + 68, 44, 60);
+        } else if (pl.id === 'arco') {
+          hCtx.fillStyle = '#15803d'; hCtx.fillRect(pl.x, pl.y, 18, pl.h); hCtx.fillRect(pl.x + pl.w - 18, pl.y, 18, pl.h);
+          hCtx.fillStyle = '#16a34a'; hCtx.fillRect(pl.x - 8, pl.y - 6, pl.w + 16, 26);
+          hCtx.strokeStyle = '#fef08a'; hCtx.lineWidth = 3; hCtx.strokeRect(pl.x - 8, pl.y - 6, pl.w + 16, 26);
+          hCtx.fillStyle = '#ffffff'; hCtx.font = 'bold 12px Courier New'; hCtx.textAlign = 'center';
+          hCtx.fillText('🏁 SALIDA / VOLAR', pl.x + pl.w / 2, pl.y + 11);
+        }
+
+        hCtx.fillStyle = isNear ? 'rgba(250, 204, 21, 0.55)' : 'rgba(255, 255, 255, 0.16)';
+        hCtx.beginPath();
+        hCtx.ellipse(pl.doorX, pl.doorY + 12, isNear ? 28 : 20, isNear ? 10 : 7, 0, 0, Math.PI * 2);
+        hCtx.fill();
+
+        if (isNear) {
+          const bounce = Math.sin(hubTime * 8) * 4;
+          hCtx.fillStyle = '#111827'; hCtx.fillRect(pl.doorX - 52, pl.y - 28 + bounce, 104, 20);
+          hCtx.strokeStyle = '#facc15'; hCtx.lineWidth = 2; hCtx.strokeRect(pl.doorX - 52, pl.y - 28 + bounce, 104, 20);
+          hCtx.fillStyle = '#fde047'; hCtx.font = 'bold 10px Courier New'; hCtx.textAlign = 'center';
+          hCtx.fillText('[E] ENTRAR', pl.doorX, pl.y - 14 + bounce);
+        }
+      });
+
+      const npcSkins = ['porri_casual', 'lara_betis', 'buti_disfraz'];
+      const npcPos = [[198, 286], [240, 294], [696, 290]];
+      npcPos.forEach(([nx, ny], i) => {
+        const sid = npcSkins[i];
+        if (sid === save.selectedSkin) return;
+        hCtx.fillStyle = 'rgba(0,0,0,0.35)';
+        hCtx.beginPath(); hCtx.ellipse(nx, ny + 26, 16, 6, 0, 0, Math.PI * 2); hCtx.fill();
+        drawCharacterSprite(hCtx, nx, ny, sid, { scale: 1.7, facingLeft: i === 2, animT: hubTime * 0.4 + i, moving: false, showJetpack: false });
+      });
+
+      if (walker.target) {
+        hCtx.strokeStyle = '#facc15'; hCtx.lineWidth = 2;
+        hCtx.beginPath(); hCtx.arc(walker.target.x, walker.target.y + 14, 10 + Math.sin(hubTime * 12) * 3, 0, Math.PI * 2); hCtx.stroke();
+      }
+
+      const sk = SKIN_MAP[save.selectedSkin] || ALL_SKINS[0];
+      hCtx.fillStyle = 'rgba(0,0,0,0.42)';
+      hCtx.beginPath(); hCtx.ellipse(walker.x, walker.y + 28 * (sk.heightScale || 1), 18, 7, 0, 0, Math.PI * 2); hCtx.fill();
+      drawCharacterSprite(hCtx, walker.x, walker.y, save.selectedSkin, {
+        scale: 1.95, facingLeft: walker.facingLeft, animT: walker.animT, moving: walker.moving, airborne: false, thrusting: false, showJetpack: true
+      });
+    }
+
+    // 6. MOTOR DE CARRERA + JEFES GIGANTES CON AUTO-DISPARO
+    const GROUND_Y = 472, CEIL_Y = 42;
+    let run = null, isHolding = false;
+
+    function createRun() {
+      return {
+        dist: 0, coins: 0, combo: 0, comboT: 0, speed: 290, time: 0,
+        bossesDefeated: 0, nextBossDist: 350, reviveLeft: save.upgrades.revive, shake: 0,
+        player: { x: 165, y: GROUND_Y - 36, vy: 0, shield: save.upgrades.startShield > 0, invuln: 0, magnetTimer: 0, rapidTimer: 0, x2Timer: 0, fireCooldown: 0, animT: 0 },
+        obstacles: [], missiles: [], lasers: [], coinsList: [], powerups: [],
+        bullets: [], bossBullets: [], particles: [], texts: [],
+        obsTimer: 1.35, coinTimer: 1.1, missileTimer: 4.4, laserTimer: 9.2, powerupTimer: 10.5,
+        boss: null, bannerTimer: 0, bannerTitle: '', bannerSub: ''
+      };
+    }
+
+    function startRun() {
+      AudioSys.init();
+      AudioSys.click();
+      closeAllModals();
+      run = createRun();
+      appMode = 'play';
+      isHolding = false;
+      hubCanvas.style.display = 'none';
+      gameCanvas.style.display = 'block';
+      document.getElementById('game-hud').style.display = 'flex';
+      document.getElementById('hub-controls').style.display = 'none';
+      document.getElementById('run-controls').style.display = 'block';
+      document.getElementById('hud-hint').style.opacity = '1';
+      document.getElementById('hud-best').textContent = save.bestDist;
+      document.getElementById('hud-boss-bar').classList.remove('visible');
+    }
+
+    function returnToHub() {
+      AudioSys.click();
+      closeAllModals();
+      appMode = 'hub';
+      isHolding = false;
+      hubCanvas.style.display = 'block';
+      gameCanvas.style.display = 'none';
+      document.getElementById('game-hud').style.display = 'none';
+      document.getElementById('hub-controls').style.display = 'block';
+      document.getElementById('run-controls').style.display = 'none';
+      walker.x = 480; walker.y = 332; walker.target = null; walker.targetPlace = null;
+      syncGlobalUI();
+    }
+
+    function spawnParticles(x, y, color, count, speed = 180) {
+      if (!run) return;
+      for (let i = 0; i < count; i++) {
+        const a = Math.random() * Math.PI * 2, s = (0.3 + Math.random() * 0.7) * speed;
+        run.particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, size: 3 + Math.random() * 4, color, life: 0.28 + Math.random() * 0.42, maxLife: 0.7 });
+      }
+    }
+
+    function addText(x, y, text, color = '#fde047', life = 1.2) {
+      if (run) run.texts.push({ x, y, text, color, life, maxLife: life });
+    }
+
+    function spawnBoss() {
+      const pool = ALL_SKINS.filter(s => s.id !== save.selectedSkin);
+      const chosen = pool[Math.floor(Math.random() * pool.length)] || ALL_SKINS[0];
+      const maxHp = 48 + (run.bossesDefeated + 1) * 28;
+      run.boss = {
+        skinId: chosen.id, name: getSkinDisplayName(chosen.id),
+        taunt: chosen.taunt || '¡A ver si me ganas!',
+        projColor: chosen.projColor || '#f43f5e', projType: chosen.projType || 'orb',
+        x: W + 140, targetX: W - 155, y: H * 0.45, hp: maxHp, maxHp,
+        enraged: false, hitFlash: 0, state: 'entering', attackTimer: 1.45, patternIdx: 0, bossLaser: null, tauntTimer: 3.5, animT: 0
+      };
+      run.obstacles = []; run.missiles = []; run.lasers = [];
+      run.bannerTimer = 2.5;
+      run.bannerTitle = '¡JEFE GIGANTE: ' + run.boss.name.toUpperCase() + '!';
+      run.bannerSub = 'Auto-disparo activado — ¡Esquiva sus ataques!';
+      AudioSys.alarm();
+    }
+
+    function fireAutoBullet() {
+      const p = run.player, dmgLvl = save.upgrades.cannonDmg, dmg = 1 + dmgLvl * 0.45, rapid = p.rapidTimer > 0;
+      const bx = p.x + 26, by = p.y - 4;
+      if (dmgLvl >= 3 || rapid) {
+        run.bullets.push({ x: bx, y: by - 8, vx: 780, vy: -22, dmg: dmg * 0.72, color: rapid ? '#38bdf8' : '#fde047' });
+        run.bullets.push({ x: bx, y: by + 8, vx: 780, vy: 22, dmg: dmg * 0.72, color: rapid ? '#38bdf8' : '#fde047' });
+        if (dmgLvl >= 5 || rapid) run.bullets.push({ x: bx + 6, y: by, vx: 820, vy: 0, dmg: dmg * 0.8, color: '#fb923c' });
+      } else {
+        run.bullets.push({ x: bx, y: by, vx: 780, vy: 0, dmg, color: '#fde047' });
+      }
+      AudioSys.shoot();
+      spawnParticles(bx, by, '#fef08a', 2, 110);
+    }
+
+    function triggerBossAttack(b) {
+      const p = run.player, enr = b.enraged, pat = b.patternIdx % 4;
+      b.patternIdx++;
+      const spd = enr ? 355 : 285;
+      if (pat === 0) {
+        const n = enr ? 5 : 4;
+        for (let i = 0; i < n; i++) {
+          const a = Math.PI + ((i / (n - 1)) - 0.5) * 0.64;
+          run.bossBullets.push({ x: b.x - 40, y: b.y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 11, color: b.projColor, type: b.projType, wave: 0, t: 0 });
+        }
+      } else if (pat === 1) {
+        const baseA = Math.atan2(p.y - b.y, p.x - (b.x - 40)), shots = enr ? 3 : 2;
+        for (let i = 0; i < shots; i++) {
+          setTimeout(() => {
+            if (appMode !== 'play' || !run || !run.boss) return;
+            const a = baseA + (Math.random() - 0.5) * 0.14;
+            run.bossBullets.push({ x: run.boss.x - 42, y: run.boss.y, vx: Math.cos(a) * spd * 1.15, vy: Math.sin(a) * spd * 1.15, r: 12, color: '#f87171', type: b.projType, wave: 0, t: 0 });
+          }, i * 210);
+        }
+      } else if (pat === 2) {
+        const ly = Math.max(CEIL_Y + 45, Math.min(GROUND_Y - 55, p.y));
+        b.bossLaser = { y: ly, charge: enr ? 0.72 : 0.92, active: 0.75, fired: false };
+        AudioSys.alarm();
+      } else {
+        const n = enr ? 5 : 3;
+        for (let i = 0; i < n; i++) {
+          setTimeout(() => {
+            if (appMode !== 'play' || !run || !run.boss) return;
+            run.bossBullets.push({ x: run.boss.x - 40, y: run.boss.y + ((i % 2 === 0) ? -24 : 24), vx: -spd * 0.95, vy: 0, r: 11, color: b.projColor, type: b.projType, wave: 165, t: i * 0.7 });
+          }, i * 160);
+        }
+      }
+    }
+
+    function defeatBoss(b) {
+      AudioSys.bossWin();
+      run.bossesDefeated++;
+      save.bossesDefeated++;
+      const reward = 150 + run.bossesDefeated * 50; // 1er jefe: 200, 2º: 250, 3º: 300...
+      save.coins += reward;
+      run.bossCoins = (run.bossCoins || 0) + reward;
+      run.shake = 16;
+      spawnParticles(b.x, b.y, '#fbbf24', 36, 350);
+      spawnParticles(b.x, b.y, '#ef4444', 26, 290);
+      for (let i = 0; i < 16; i++) {
+        run.coinsList.push({ x: b.x - 80 + Math.random() * 140, y: Math.max(CEIL_Y + 30, Math.min(GROUND_Y - 40, b.y - 70 + Math.random() * 140)), val: 2 });
+      }
+      if (save.upgrades.startShield >= 2) run.player.shield = true;
+      addText(W / 2, H * 0.34, '¡JEFE DERROTADO! +' + reward + ' MONEDAS', '#fde047', 2.4);
+      showToast('🏆 ¡Jefe derrotado! +' + reward + ' 🪙 guardadas');
+      run.bossBullets = []; run.boss = null; run.nextBossDist = run.dist + 420; run.obsTimer = 2.0;
+      persistSave();
+    }
+
+    function distPointSeg(px, py, x1, y1, x2, y2) {
+      const dx = x2 - x1, dy = y2 - y1, l2 = dx * dx + dy * dy;
+      if (l2 === 0) return Math.hypot(px - x1, py - y1);
+      const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / l2));
+      return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+    }
+
+    function damagePlayer(reason) {
+      const p = run.player;
+      if (p.invuln > 0) return;
+      if (p.shield) {
+        p.shield = false; p.invuln = 1.4; run.shake = 10; AudioSys.shield();
+        spawnParticles(p.x, p.y, '#38bdf8', 22, 230); addText(p.x, p.y - 30, '¡ESCUDO ROTO!', '#38bdf8', 1.2);
+        return;
+      }
+      if (run.reviveLeft > 0) {
+        run.reviveLeft--; p.invuln = 2.4; p.vy = -220; run.shake = 14; AudioSys.powerup();
+        spawnParticles(p.x, p.y, '#fde047', 30, 260); addText(p.x, p.y - 34, '¡MILAGRO DE SANTA MARÍA!', '#fde047', 1.7);
+        return;
+      }
+      AudioSys.hit(); run.shake = 18; spawnParticles(p.x, p.y, '#ef4444', 30, 280);
+      finishRun(reason);
+    }
+
+    function finishRun(reason) {
+      appMode = 'gameover';
+      isHolding = false;
+      const distFinal = Math.floor(run.dist);
+      const strideMult = 1 + save.upgrades.stride * 0.12;
+      const totalEarned = Math.round((run.coins + Math.floor(distFinal * 0.08)) * strideMult);
+      const isRecord = distFinal > save.bestDist;
+      save.coins += totalEarned;
+      if (isRecord) save.bestDist = distFinal;
+      persistSave();
+
+      document.getElementById('go-title').textContent = isRecord ? '🏆 ¡RÉCORD HISTÓRICO!' : '💥 ¡FIN DEL VUELO!';
+      document.getElementById('go-reason').textContent = reason || 'Te estrellaste sobre Villamartín';
+      document.getElementById('go-record-banner').style.display = isRecord ? 'block' : 'none';
+      document.getElementById('go-dist').textContent = distFinal + 'm';
+      document.getElementById('go-bosses').textContent = run.bossesDefeated;
+      document.getElementById('go-coins').textContent = '+' + (totalEarned + (run.bossCoins || 0));
+      document.getElementById('gameover-modal').classList.add('open');
+    }
+
+    function updatePlay(dt) {
+      run.time += dt;
+      if (run.time > 3.2) document.getElementById('hud-hint').style.opacity = '0';
+
+      const p = run.player;
+      p.animT += dt;
+      if (p.invuln > 0) p.invuln -= dt;
+      if (p.magnetTimer > 0) p.magnetTimer -= dt;
+      if (p.rapidTimer > 0) p.rapidTimer -= dt;
+      if (p.x2Timer > 0) p.x2Timer -= dt;
+      if (run.comboT > 0) { run.comboT -= dt; if (run.comboT <= 0) run.combo = 0; }
+      if (run.shake > 0) run.shake = Math.max(0, run.shake - dt * 36);
+      if (run.bannerTimer > 0) run.bannerTimer -= dt;
+
+      const targetSpeed = run.boss ? 215 : Math.min(525, 290 + run.dist * 0.14);
+      run.speed += (targetSpeed - run.speed) * Math.min(1, dt * 3);
+      run.dist += (run.speed * dt) / 22;
+
+      const jp = JETPACKS.find(j => j.id === save.selectedJetpack) || JETPACKS[0];
+      const agility = save.upgrades.agility * 90 + save.upgrades.jetControl * 55 + jp.bonusThrust * 35;
+      if (isHolding) {
+        p.vy -= (1980 + agility) * dt;
+        AudioSys.jet();
+        if (Math.random() < 0.65) {
+          const fc = jp.flame[Math.floor(Math.random() * jp.flame.length)];
+          run.particles.push({ x: p.x - 16, y: p.y + 12, vx: -140 - Math.random() * 80, vy: 140 + Math.random() * 140, size: 4 + Math.random() * 3, color: fc, life: 0.24, maxLife: 0.24 });
+        }
+      } else {
+        p.vy += 1120 * dt;
+      }
+
+      p.vy = Math.max(-460, Math.min(540, p.vy));
+      p.y += p.vy * dt;
+      const sk = SKIN_MAP[save.selectedSkin] || ALL_SKINS[0];
+      const fOff = 32 * (sk.heightScale || 1), hOff = 30 * (sk.heightScale || 1);
+      if (p.y > GROUND_Y - fOff) { p.y = GROUND_Y - fOff; p.vy = 0; }
+      if (p.y < CEIL_Y + hOff) { p.y = CEIL_Y + hOff; if (p.vy < 0) p.vy = 0; }
+
+      if (!run.boss && run.dist >= run.nextBossDist) spawnBoss();
+
+      if (!run.boss) {
+        run.obsTimer -= dt;
+        if (run.obsTimer <= 0) {
+          const r = Math.random(), len = 105 + Math.random() * 75, cy = CEIL_Y + 70 + Math.random() * (GROUND_Y - CEIL_Y - 140);
+          let angle = 0, rotSpeed = 0;
+          if (r < 0.32) angle = Math.PI / 2;
+          else if (r < 0.62) angle = Math.random() < 0.5 ? 0.68 : -0.68;
+          else if (r < 0.85) { angle = Math.random() * Math.PI; rotSpeed = (Math.random() < 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.9); }
+          run.obstacles.push({ x: W + 90, y: cy, len, angle, rotSpeed });
+          run.obsTimer = Math.max(0.82, 1.78 - run.dist * 0.00055);
+        }
+
+        run.missileTimer -= dt;
+        if (run.missileTimer <= 0 && run.dist > 55) {
+          run.missiles.push({ x: W + 45, y: Math.max(CEIL_Y + 45, Math.min(GROUND_Y - 50, p.y)), warn: 1.05, speed: 580 + Math.min(200, run.dist * 0.15) });
+          AudioSys.alarm();
+          run.missileTimer = Math.max(3.0, 6.2 - run.dist * 0.002);
+        }
+
+        run.laserTimer -= dt;
+        if (run.laserTimer <= 0 && run.dist > 120) {
+          run.lasers.push({ y: CEIL_Y + 65 + Math.random() * (GROUND_Y - CEIL_Y - 130), warn: 1.15, active: 0.72 });
+          run.laserTimer = Math.max(5.8, 10.5 - run.dist * 0.002);
+        }
+      }
+
+      run.coinTimer -= dt;
+      if (run.coinTimer <= 0) {
+        const roll = Math.random(), val = Math.random() < save.upgrades.luck * 0.1 ? 2 : 1;
+        const baseY = CEIL_Y + 80 + Math.random() * (GROUND_Y - CEIL_Y - 170);
+        if (roll < 0.26) {
+          [[0,0],[1,1],[2,2],[3,1],[4,0],[6,2],[6,1],[6,0],[7,1],[8,0],[8,1],[8,2]].forEach(([gx, gy]) => run.coinsList.push({ x: W + 60 + gx * 26, y: baseY + gy * 26, val }));
+        } else if (roll < 0.62) {
+          for (let i = 0; i < 8; i++) run.coinsList.push({ x: W + 60 + i * 32, y: baseY + Math.sin(i * 0.6) * 48, val });
+        } else {
+          for (let rr = 0; rr < 2; rr++) for (let c = 0; c < 5; c++) run.coinsList.push({ x: W + 60 + c * 30, y: baseY + rr * 30, val });
+        }
+        run.coinTimer = run.boss ? 4.2 : 2.25;
+      }
+
+      run.powerupTimer -= dt;
+      if (run.powerupTimer <= 0) {
+        const types = ['shield', 'magnet', 'rapid', 'x2'];
+        run.powerups.push({ x: W + 50, y: CEIL_Y + 75 + Math.random() * (GROUND_Y - CEIL_Y - 150), type: types[Math.floor(Math.random() * types.length)], t: 0 });
+        run.powerupTimer = Math.max(8.0, 13.0 - save.upgrades.luck * 0.9);
+      }
+
+      if (run.boss) {
+        const b = run.boss;
+        b.animT += dt;
+        if (b.hitFlash > 0) b.hitFlash -= dt;
+        if (b.tauntTimer > 0) b.tauntTimer -= dt;
+        if (b.state === 'entering') {
+          b.x += (b.targetX - b.x) * Math.min(1, dt * 3.5);
+          if (Math.abs(b.x - b.targetX) < 6) { b.x = b.targetX; b.state = 'fighting'; }
+        } else {
+          const hs = b.enraged ? 2.5 : 1.65;
+          b.y += ((CEIL_Y + 115 + (Math.sin(b.animT * hs) * 0.5 + 0.5) * (GROUND_Y - CEIL_Y - 220)) - b.y) * Math.min(1, dt * 3.2);
+          if (!b.enraged && b.hp <= b.maxHp * 0.4) {
+            b.enraged = true; b.taunt = '¡AHORA ME HAS ENFADADO DE VERDAD!'; b.tauntTimer = 2.8; run.shake = 10;
+            AudioSys.alarm(); spawnParticles(b.x, b.y, '#ef4444', 24, 240);
+          }
+          b.attackTimer -= dt;
+          if (b.attackTimer <= 0 && !b.bossLaser) { triggerBossAttack(b); b.attackTimer = b.enraged ? 1.28 : 1.78; }
+          if (b.bossLaser) {
+            const bl = b.bossLaser;
+            if (bl.charge > 0) bl.charge -= dt;
+            else {
+              if (!bl.fired) { bl.fired = true; run.shake = 8; AudioSys.hit(); }
+              bl.active -= dt;
+              if (Math.abs(p.y - bl.y) < 26) damagePlayer('Te fulminó el rayo de ' + b.name);
+              if (bl.active <= 0) b.bossLaser = null;
+            }
+          }
+          p.fireCooldown -= dt;
+          const baseInt = Math.max(0.11, 0.27 - save.upgrades.cannonRate * 0.032);
+          if (p.fireCooldown <= 0) { fireAutoBullet(); p.fireCooldown = p.rapidTimer > 0 ? baseInt * 0.58 : baseInt; }
+        }
+      }
+
+      for (let i = run.bullets.length - 1; i >= 0; i--) {
+        const bl = run.bullets[i];
+        bl.x += bl.vx * dt; bl.y += bl.vy * dt;
+        if (bl.x > W + 30) { run.bullets.splice(i, 1); continue; }
+        if (run.boss && run.boss.state === 'fighting') {
+          const b = run.boss;
+          if (Math.abs(bl.x - b.x) < 58 && Math.abs(bl.y - b.y) < 76) {
+            b.hp -= bl.dmg; b.hitFlash = 0.08; AudioSys.bossHit(); spawnParticles(bl.x, bl.y, '#fde047', 4, 140);
+            run.bullets.splice(i, 1);
+            if (b.hp <= 0) { defeatBoss(b); break; }
+          }
+        }
+      }
+
+      for (let i = run.bossBullets.length - 1; i >= 0; i--) {
+        const bb = run.bossBullets[i];
+        bb.t += dt; bb.x += bb.vx * dt; bb.y += (bb.vy + (bb.wave ? Math.cos(bb.t * 6) * bb.wave : 0)) * dt;
+        if (bb.x < -40 || bb.y < -40 || bb.y > H + 40) { run.bossBullets.splice(i, 1); continue; }
+        if (Math.hypot(bb.x - p.x, bb.y - p.y) < bb.r + 16) {
+          run.bossBullets.splice(i, 1);
+          damagePlayer('Te dio un ataque de ' + (run.boss ? run.boss.name : 'un Jefe'));
+        }
+      }
+
+      for (let i = run.obstacles.length - 1; i >= 0; i--) {
+        const o = run.obstacles[i];
+        o.x -= run.speed * dt; o.angle += o.rotSpeed * dt;
+        if (o.x < -140) { run.obstacles.splice(i, 1); continue; }
+        const hx = Math.cos(o.angle) * o.len * 0.5, hy = Math.sin(o.angle) * o.len * 0.5;
+        if (distPointSeg(p.x, p.y, o.x - hx, o.y - hy, o.x + hx, o.y + hy) < 20) damagePlayer('Te electrocutó una catenaria de feria');
+      }
+
+      for (let i = run.missiles.length - 1; i >= 0; i--) {
+        const m = run.missiles[i];
+        if (m.warn > 0) { m.warn -= dt; m.y += (p.y - m.y) * Math.min(1, dt * 3.5); }
+        else {
+          m.x -= m.speed * dt;
+          if (Math.random() < 0.55) run.particles.push({ x: m.x + 18, y: m.y, vx: 60, vy: (Math.random() - 0.5) * 40, size: 4, color: '#cbd5e1', life: 0.2, maxLife: 0.2 });
+          if (Math.hypot(m.x - p.x, m.y - p.y) < 24) { run.missiles.splice(i, 1); damagePlayer('Te dio un cohete de la Feria de Villamartín'); continue; }
+          if (m.x < -60) run.missiles.splice(i, 1);
+        }
+      }
+
+      for (let i = run.lasers.length - 1; i >= 0; i--) {
+        const l = run.lasers[i];
+        if (l.warn > 0) l.warn -= dt;
+        else {
+          l.active -= dt;
+          if (Math.abs(p.y - l.y) < 22) damagePlayer('Te cortó un láser de feria');
+          if (l.active <= 0) run.lasers.splice(i, 1);
+        }
+      }
+
+      const magR = (p.magnetTimer > 0 ? 225 : 0) + save.upgrades.magnet * 30;
+      for (let i = run.coinsList.length - 1; i >= 0; i--) {
+        const c = run.coinsList[i];
+        c.x -= run.speed * dt;
+        const d = Math.hypot(p.x - c.x, p.y - c.y);
+        if (magR > 0 && d < magR) { c.x += ((p.x - c.x) / Math.max(1, d)) * 560 * dt; c.y += ((p.y - c.y) / Math.max(1, d)) * 560 * dt; }
+        if (d < 26) {
+          run.coins += c.val * (p.x2Timer > 0 ? 2 : 1);
+          run.combo++; run.comboT = 0.6; AudioSys.coin(run.combo); spawnParticles(c.x, c.y, '#fde047', 4, 90);
+          run.coinsList.splice(i, 1); continue;
+        }
+        if (c.x < -30) run.coinsList.splice(i, 1);
+      }
+
+      for (let i = run.powerups.length - 1; i >= 0; i--) {
+        const pw = run.powerups[i];
+        pw.t += dt; pw.x -= run.speed * 0.85 * dt; pw.y += Math.sin(pw.t * 4) * 45 * dt;
+        if (Math.hypot(pw.x - p.x, pw.y - p.y) < 30) {
+          AudioSys.powerup();
+          if (pw.type === 'shield') { p.shield = true; addText(p.x, p.y - 28, '¡ESCUDO!', '#38bdf8'); }
+          else if (pw.type === 'magnet') { p.magnetTimer = 9; addText(p.x, p.y - 28, '¡IMÁN!', '#f472b6'); }
+          else if (pw.type === 'rapid') { p.rapidTimer = 9; addText(p.x, p.y - 28, '¡FUEGO RÁPIDO!', '#fbbf24'); }
+          else { p.x2Timer = 10; addText(p.x, p.y - 28, '¡MONEDAS x2!', '#fde047'); }
+          spawnParticles(pw.x, pw.y, '#fff', 14, 180); run.powerups.splice(i, 1); continue;
+        }
+        if (pw.x < -40) run.powerups.splice(i, 1);
+      }
+
+      for (let i = run.particles.length - 1; i >= 0; i--) {
+        const pt = run.particles[i];
+        pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.life -= dt;
+        if (pt.life <= 0) run.particles.splice(i, 1);
+      }
+      for (let i = run.texts.length - 1; i >= 0; i--) {
+        const tx = run.texts[i];
+        tx.y -= 36 * dt; tx.life -= dt;
+        if (tx.life <= 0) run.texts.splice(i, 1);
+      }
+
+      syncRunHUD();
+    }
+
+    function syncRunHUD() {
+      document.getElementById('hud-dist').textContent = Math.floor(run.dist);
+      document.getElementById('hud-coins').textContent = run.coins + (run.bossCoins || 0);
+      const cycle = (run.dist % 900) / 900;
+      document.getElementById('hud-zone').textContent = cycle < 0.33 ? 'DÍA' : cycle < 0.66 ? 'ATARDECER' : 'FERIA';
+
+      const nb = document.getElementById('hud-next-boss'), bb = document.getElementById('hud-boss-bar');
+      if (run.boss) {
+        nb.textContent = '¡COMBATE!';
+        bb.classList.add('visible');
+        document.getElementById('boss-bar-title').textContent = run.boss.name.toUpperCase() + (run.boss.enraged ? ' [FURIOSO]' : '');
+        document.getElementById('boss-bar-fill').style.width = Math.max(0, (run.boss.hp / run.boss.maxHp) * 100) + '%';
+      } else {
+        nb.textContent = 'JEFE: ' + Math.max(0, Math.ceil(run.nextBossDist - run.dist)) + 'm';
+        bb.classList.remove('visible');
+      }
+
+      const p = run.player;
+      let tags = '';
+      if (p.shield) tags += '<span class="status-tag shield">ESCUDO</span>';
+      if (run.reviveLeft > 0) tags += '<span class="status-tag revive">MILAGRO</span>';
+      if (p.rapidTimer > 0) tags += '<span class="status-tag turbo">FUEGO ' + p.rapidTimer.toFixed(0) + 's</span>';
+      if (p.magnetTimer > 0) tags += '<span class="status-tag magnet">IMÁN ' + p.magnetTimer.toFixed(0) + 's</span>';
+      if (p.x2Timer > 0) tags += '<span class="status-tag x2">x2 ' + p.x2Timer.toFixed(0) + 's</span>';
+      document.getElementById('hud-tags').innerHTML = tags;
+    }
+
+    function lerpColor(c1, c2, t) {
+      const a = parseInt(c1.slice(1), 16), b = parseInt(c2.slice(1), 16);
+      const r = Math.round(((a >> 16) & 255) * (1 - t) + ((b >> 16) & 255) * t);
+      const g = Math.round(((a >> 8) & 255) * (1 - t) + ((b >> 8) & 255) * t);
+      const bl = Math.round((a & 255) * (1 - t) + (b & 255) * t);
+      return 'rgb(' + r + ',' + g + ',' + bl + ')';
+    }
+
+    function drawPlay() {
+      gCtx.save();
+      if (run.shake > 0) gCtx.translate((Math.random() - 0.5) * run.shake, (Math.random() - 0.5) * run.shake);
+
+      const cycle = (run.dist % 900) / 900;
+      let skyTop, skyBot, night = 0;
+      if (cycle < 0.33) { const t = cycle / 0.33; skyTop = lerpColor('#0284c7', '#4c1d95', t); skyBot = lerpColor('#7dd3fc', '#f97316', t); night = t * 0.35; }
+      else if (cycle < 0.66) { const t = (cycle - 0.33) / 0.33; skyTop = lerpColor('#4c1d95', '#0f172a', t); skyBot = lerpColor('#f97316', '#312e81', t); night = 0.35 + t * 0.65; }
+      else { const t = (cycle - 0.66) / 0.34; skyTop = lerpColor('#0f172a', '#0284c7', t); skyBot = lerpColor('#312e81', '#7dd3fc', t); night = 1 - t; }
+
+      const grad = gCtx.createLinearGradient(0, 0, 0, GROUND_Y);
+      grad.addColorStop(0, skyTop); grad.addColorStop(1, skyBot);
+      gCtx.fillStyle = grad; gCtx.fillRect(0, 0, W, GROUND_Y);
+
+      if (night > 0.2) {
+        gCtx.fillStyle = 'rgba(255,255,255,' + (night * 0.8).toFixed(2) + ')';
+        for (let i = 0; i < 30; i++) gCtx.fillRect(((i * 173 - run.dist * 2) % W + W) % W, 48 + (i * 47) % 185, 3, 3);
+      }
+
+      const mOff = (run.dist * 3.5) % 480;
+      gCtx.fillStyle = night > 0.5 ? '#1e1b4b' : '#4338ca';
+      for (let x = -mOff; x < W + 480; x += 480) {
+        gCtx.beginPath(); gCtx.moveTo(x, GROUND_Y); gCtx.lineTo(x + 120, 270); gCtx.lineTo(x + 250, 340); gCtx.lineTo(x + 370, 240); gCtx.lineTo(x + 480, GROUND_Y); gCtx.closePath(); gCtx.fill();
+      }
+
+      const hOff = (run.dist * 9) % 320;
+      for (let x = -hOff; x < W + 320; x += 320) {
+        gCtx.fillStyle = night > 0.5 ? '#cbd5e1' : '#f8fafc'; gCtx.fillRect(x + 20, GROUND_Y - 82, 74, 82);
+        gCtx.fillStyle = '#c2410c'; gCtx.fillRect(x + 14, GROUND_Y - 92, 86, 12);
+        gCtx.fillStyle = night > 0.5 ? '#fde047' : '#334155'; gCtx.fillRect(x + 36, GROUND_Y - 62, 16, 18); gCtx.fillRect(x + 64, GROUND_Y - 62, 16, 18);
+        gCtx.fillStyle = '#78350f'; gCtx.fillRect(x + 146, GROUND_Y - 38, 10, 38);
+        gCtx.fillStyle = '#3f6212'; gCtx.fillRect(x + 126, GROUND_Y - 68, 50, 34);
+        gCtx.fillStyle = night > 0.5 ? '#e2e8f0' : '#ffffff'; gCtx.fillRect(x + 225, GROUND_Y - 122, 42, 122);
+        gCtx.fillStyle = '#b45309'; gCtx.fillRect(x + 220, GROUND_Y - 130, 52, 10);
+      }
+
+      gCtx.fillStyle = '#1e1b4b'; gCtx.fillRect(0, 0, W, CEIL_Y);
+      const lOff = (run.dist * 18) % 64, lCols = ['#ef4444', '#22c55e', '#facc15', '#38bdf8', '#f97316'];
+      for (let x = -lOff; x < W + 64; x += 64) {
+        gCtx.fillStyle = lCols[Math.abs(Math.floor((x + run.dist * 18) / 64)) % lCols.length];
+        gCtx.fillRect(x + 24, CEIL_Y - 4, 12, 14);
+      }
+
+      gCtx.fillStyle = '#33294d'; gCtx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+      gCtx.fillStyle = '#64748b'; gCtx.fillRect(0, GROUND_Y, W, 6);
+      const gOff = (run.dist * 22) % 48;
+      gCtx.fillStyle = '#1e1838';
+      for (let x = -gOff; x < W + 48; x += 48) { gCtx.fillRect(x, GROUND_Y + 18, 24, 8); gCtx.fillRect(x + 22, GROUND_Y + 42, 24, 8); }
+
+      run.coinsList.forEach(c => {
+        const w = Math.max(4, 16 * Math.abs(Math.sin(run.time * 7 + c.x * 0.05)));
+        gCtx.fillStyle = c.val > 1 ? '#38bdf8' : '#facc15'; gCtx.fillRect(c.x - w / 2, c.y - 8, w, 16);
+        gCtx.fillStyle = '#fef9c3'; gCtx.fillRect(c.x - w / 4, c.y - 5, Math.max(2, w / 2), 10);
+      });
+
+      run.powerups.forEach(pw => {
+        const col = pw.type === 'shield' ? '#38bdf8' : pw.type === 'magnet' ? '#f472b6' : pw.type === 'rapid' ? '#fbbf24' : '#a3e635';
+        const ic = pw.type === 'shield' ? 'E' : pw.type === 'magnet' ? 'M' : pw.type === 'rapid' ? 'F' : '2';
+        gCtx.fillStyle = 'rgba(15,23,42,0.85)'; gCtx.beginPath(); gCtx.arc(pw.x, pw.y, 17, 0, Math.PI * 2); gCtx.fill();
+        gCtx.strokeStyle = col; gCtx.lineWidth = 3; gCtx.stroke();
+        gCtx.fillStyle = col; gCtx.font = 'bold 15px Courier New'; gCtx.textAlign = 'center'; gCtx.fillText(ic, pw.x, pw.y + 5);
+      });
+
+      run.obstacles.forEach(o => {
+        const hx = Math.cos(o.angle) * o.len * 0.5, hy = Math.sin(o.angle) * o.len * 0.5;
+        gCtx.strokeStyle = '#f97316'; gCtx.lineWidth = 10; gCtx.beginPath(); gCtx.moveTo(o.x - hx, o.y - hy); gCtx.lineTo(o.x + hx, o.y + hy); gCtx.stroke();
+        gCtx.strokeStyle = '#fef08a'; gCtx.lineWidth = 4; gCtx.stroke();
+        gCtx.fillStyle = '#334155'; gCtx.fillRect(o.x - hx - 9, o.y - hy - 9, 18, 18); gCtx.fillRect(o.x + hx - 9, o.y + hy - 9, 18, 18);
+        gCtx.fillStyle = '#ef4444'; gCtx.fillRect(o.x - hx - 4, o.y - hy - 4, 8, 8); gCtx.fillRect(o.x + hx - 4, o.y + hy - 4, 8, 8);
+      });
+
+      run.lasers.forEach(l => {
+        if (l.warn > 0) {
+          gCtx.fillStyle = Math.floor(run.time * 16) % 2 === 0 ? 'rgba(239,68,68,0.55)' : 'rgba(254,240,138,0.45)';
+          gCtx.fillRect(0, l.y - 3, W, 6);
+          gCtx.fillStyle = '#ef4444'; gCtx.fillRect(W - 36, l.y - 14, 36, 28);
+          gCtx.fillStyle = '#fff'; gCtx.font = 'bold 16px Courier New'; gCtx.textAlign = 'center'; gCtx.fillText('!', W - 18, l.y + 6);
+        } else {
+          gCtx.fillStyle = 'rgba(239,68,68,0.85)'; gCtx.fillRect(0, l.y - 16, W, 32);
+          gCtx.fillStyle = '#fef08a'; gCtx.fillRect(0, l.y - 6, W, 12);
+        }
+      });
+
+      run.missiles.forEach(m => {
+        if (m.warn > 0) {
+          gCtx.fillStyle = Math.floor(run.time * 18) % 2 === 0 ? '#ef4444' : '#fbbf24'; gCtx.fillRect(W - 44, m.y - 18, 36, 36);
+          gCtx.fillStyle = '#111'; gCtx.font = 'bold 22px Courier New'; gCtx.textAlign = 'center'; gCtx.fillText('!', W - 26, m.y + 8);
+        } else {
+          gCtx.fillStyle = '#dc2626'; gCtx.fillRect(m.x - 20, m.y - 8, 34, 16);
+          gCtx.fillStyle = '#fef08a'; gCtx.fillRect(m.x - 26, m.y - 5, 8, 10);
+          gCtx.fillStyle = '#fff'; gCtx.fillRect(m.x - 8, m.y - 3, 14, 6);
+        }
+      });
+
+      if (run.boss) {
+        const b = run.boss;
+        if (b.bossLaser) {
+          const bl = b.bossLaser;
+          if (bl.charge > 0) {
+            gCtx.fillStyle = Math.floor(run.time * 22) % 2 === 0 ? 'rgba(244,63,94,0.72)' : 'rgba(253,224,71,0.5)';
+            gCtx.fillRect(0, bl.y - 4, b.x - 45, 8);
+          } else {
+            gCtx.fillStyle = 'rgba(239,68,68,0.88)'; gCtx.fillRect(0, bl.y - 20, b.x - 45, 40);
+            gCtx.fillStyle = '#fff'; gCtx.fillRect(0, bl.y - 8, b.x - 45, 16);
+          }
+        }
+        if (b.enraged) {
+          gCtx.fillStyle = 'rgba(239,68,68,0.24)'; gCtx.beginPath(); gCtx.arc(b.x, b.y, 82 + Math.sin(run.time * 12) * 8, 0, Math.PI * 2); gCtx.fill();
+        }
+        drawCharacterSprite(gCtx, b.x, b.y, b.skinId, {
+          scale: 5.2, facingLeft: true, animT: b.animT, airborne: true, thrusting: true,
+          showJetpack: true, jetpackId: 'feria', hitFlash: b.hitFlash > 0, isBoss: true
+        });
+        if (b.tauntTimer > 0) {
+          gCtx.font = 'bold 12px Courier New';
+          const tw = Math.min(360, gCtx.measureText(b.taunt).width + 22);
+          const bx = Math.min(W - tw - 12, Math.max(12, b.x - tw * 0.75)), by = Math.max(CEIL_Y + 56, b.y - 122);
+          gCtx.fillStyle = '#fff'; gCtx.fillRect(bx, by, tw, 28);
+          gCtx.strokeStyle = '#111'; gCtx.lineWidth = 3; gCtx.strokeRect(bx, by, tw, 28);
+          gCtx.fillStyle = '#111'; gCtx.textAlign = 'center'; gCtx.fillText(b.taunt, bx + tw / 2, by + 18);
+        }
+      }
+
+      run.bullets.forEach(bl => {
+        gCtx.fillStyle = bl.color; gCtx.fillRect(bl.x - 8, bl.y - 3, 16, 6);
+        gCtx.fillStyle = '#fff'; gCtx.fillRect(bl.x - 4, bl.y - 1, 10, 2);
+      });
+
+      run.bossBullets.forEach(bb => {
+        gCtx.fillStyle = bb.color; gCtx.beginPath(); gCtx.arc(bb.x, bb.y, bb.r, 0, Math.PI * 2); gCtx.fill();
+        gCtx.strokeStyle = '#111'; gCtx.lineWidth = 2; gCtx.stroke();
+        if (bb.type === 'ball_betis') { gCtx.fillStyle = '#fff'; gCtx.fillRect(bb.x - 4, bb.y - 7, 3, 14); gCtx.fillRect(bb.x + 2, bb.y - 7, 3, 14); }
+        else if (bb.type === 'ball_barca') { gCtx.fillStyle = '#1d4ed8'; gCtx.fillRect(bb.x - 5, bb.y - 7, 4, 14); gCtx.fillStyle = '#facc15'; gCtx.fillRect(bb.x + 2, bb.y - 4, 3, 8); }
+        else if (bb.type === 'dumbbell') { gCtx.fillStyle = '#94a3b8'; gCtx.fillRect(bb.x - 10, bb.y - 3, 20, 6); }
+		else if (bb.type === 'pokeball') { gCtx.fillStyle = '#fff'; gCtx.fillRect(bb.x - bb.r + 2, bb.y, (bb.r - 2) * 2, bb.r - 2); gCtx.fillStyle = '#111'; gCtx.fillRect(bb.x - bb.r, bb.y - 2, bb.r * 2, 4); gCtx.fillStyle = '#fff'; gCtx.fillRect(bb.x - 3, bb.y - 3, 6, 6); }
+        else if (bb.type === 'shrimp') { gCtx.fillStyle = '#f97316'; gCtx.fillRect(bb.x - 6, bb.y - 3, 12, 3); gCtx.fillStyle = '#fda4af'; gCtx.fillRect(bb.x - 4, bb.y + 2, 8, 3); }
+        else if (bb.type === 'flask') { gCtx.fillStyle = '#e2e8f0'; gCtx.fillRect(bb.x - 3, bb.y - 9, 6, 5); gCtx.fillStyle = '#4ade80'; gCtx.fillRect(bb.x - 6, bb.y - 2, 12, 7); }
+        else if (bb.type === 'gavel') { gCtx.fillStyle = '#78350f'; gCtx.fillRect(bb.x - 8, bb.y - 3, 16, 6); gCtx.fillStyle = '#facc15'; gCtx.fillRect(bb.x - 2, bb.y - 8, 4, 16); }
+        else if (bb.type === 'math_pi') { gCtx.fillStyle = '#ffffff'; gCtx.fillRect(bb.x - 6, bb.y - 5, 12, 3); gCtx.fillRect(bb.x - 4, bb.y - 2, 3, 8); gCtx.fillRect(bb.x + 2, bb.y - 2, 3, 8); }
+		else if (bb.type === 'ball_spain') { gCtx.fillStyle = '#facc15'; gCtx.fillRect(bb.x - bb.r + 2, bb.y - 3, (bb.r - 2) * 2, 6); }
+		else { gCtx.fillStyle = '#fff'; gCtx.fillRect(bb.x - 4, bb.y - 4, 4, 4); }
+      });
+
+      const p = run.player;
+      if (!(p.invuln > 0 && Math.floor(run.time * 18) % 2 === 0)) {
+        drawCharacterSprite(gCtx, p.x, p.y, save.selectedSkin, { scale: 2.15, animT: p.animT, airborne: p.y < GROUND_Y - 36, thrusting: isHolding, showJetpack: true });
+      }
+      if (p.shield) {
+        gCtx.strokeStyle = '#38bdf8'; gCtx.lineWidth = 3; gCtx.fillStyle = 'rgba(56,189,248,0.16)';
+        gCtx.beginPath(); gCtx.arc(p.x, p.y, 38, 0, Math.PI * 2); gCtx.fill(); gCtx.stroke();
+      }
+
+      run.particles.forEach(pt => {
+        gCtx.globalAlpha = Math.max(0, pt.life / pt.maxLife); gCtx.fillStyle = pt.color;
+        gCtx.fillRect(pt.x - pt.size / 2, pt.y - pt.size / 2, pt.size, pt.size);
+      });
+      gCtx.globalAlpha = 1;
+
+      run.texts.forEach(tx => {
+        gCtx.globalAlpha = Math.max(0, tx.life / tx.maxLife); gCtx.font = 'bold 16px Courier New'; gCtx.textAlign = 'center';
+        gCtx.fillStyle = '#000'; gCtx.fillText(tx.text, tx.x + 2, tx.y + 2);
+        gCtx.fillStyle = tx.color; gCtx.fillText(tx.text, tx.x, tx.y);
+      });
+      gCtx.globalAlpha = 1;
+
+      if (run.bannerTimer > 0) {
+        gCtx.fillStyle = 'rgba(153, 27, 27, 0.9)'; gCtx.fillRect(0, H * 0.36, W, 74);
+        gCtx.fillStyle = '#fde047'; gCtx.font = 'bold 22px Courier New'; gCtx.textAlign = 'center'; gCtx.fillText(run.bannerTitle, W / 2, H * 0.36 + 34);
+        gCtx.fillStyle = '#fff'; gCtx.font = 'bold 13px Courier New'; gCtx.fillText(run.bannerSub, W / 2, H * 0.36 + 58);
+      }
+
+      gCtx.restore();
+    }
+
+    // 7. MODALES: BAR PORRI, MERCADONA, IGLESIA, IES / POLI
+    let activeShop = null, porriCharId = 'estandar', porriSkinId = 'estandar_casual', previewRaf = null;
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.remove('show'), 2300);
+    }
+
+    function closeAllModals() {
+      document.getElementById('shop-modal').classList.remove('open');
+      document.getElementById('pause-modal').classList.remove('open');
+      document.getElementById('gameover-modal').classList.remove('open');
+      activeShop = null;
+      if (previewRaf) { cancelAnimationFrame(previewRaf); previewRaf = null; }
+    }
+
+    function openShopModal(placeId) {
+      AudioSys.click();
+      activeShop = placeId;
+      if (placeId === 'porri') {
+        porriCharId = SKIN_MAP[save.selectedSkin].charId;
+        porriSkinId = save.selectedSkin;
+      }
+      document.getElementById('shop-modal').classList.add('open');
+      renderShopModal();
+    }
+
+    function renderShopModal() {
+      if (previewRaf) { cancelAnimationFrame(previewRaf); previewRaf = null; }
+      document.getElementById('shop-modal-coins').textContent = save.coins;
+      const titleEl = document.getElementById('shop-modal-title');
+      const subEl = document.getElementById('shop-modal-sub');
+      const bodyEl = document.getElementById('shop-modal-body');
+
+      if (activeShop === 'porri') {
+        titleEl.textContent = '🍺 BAR PORRI — LA PANDILLA (25 SKINS)';
+        subEl.textContent = 'Elige personaje y selecciona su skin favorita.';
+        renderBarPorri(bodyEl);
+      } else if (activeShop === 'mercadona') {
+        titleEl.textContent = '🛒 MERCADONA — JETPACKS Y CAÑÓN';
+        subEl.textContent = 'Compra propulsores y mejora tu disparo automático contra Jefes.';
+        renderMercadona(bodyEl);
+      } else if (activeShop === 'iglesia') {
+        titleEl.textContent = '⛪ IGLESIA DE SANTA MARÍA — BENDICIONES';
+        subEl.textContent = 'Protección divina, segundas oportunidades y suerte del pueblo.';
+        bodyEl.innerHTML = buildUpgradesGrid('iglesia');
+        bindUpgradeClicks(bodyEl);
+      } else if (activeShop === 'ies') {
+        titleEl.textContent = '🏫 IES MATRERA & POLIDEPORTIVO';
+        subEl.textContent = 'Entrena tu agilidad aérea, imán natural y zancada olímpica.';
+        bodyEl.innerHTML = buildUpgradesGrid('ies');
+        bindUpgradeClicks(bodyEl);
+      }
+    }
+
+    function renderBarPorri(bodyEl) {
+      const ch = CHAR_MAP[porriCharId];
+      if (!ch.skins.some(s => s.id === porriSkinId)) porriSkinId = ch.skins[0].id;
+      const sk = SKIN_MAP[porriSkinId];
+      const unlocked = save.unlockedSkins.includes(sk.id);
+      const equipped = save.selectedSkin === sk.id;
+
+      let rosterHtml = '<div class="roster-list">';
+      CHARACTERS.forEach(c => {
+        const isAct = c.id === porriCharId ? ' active' : '';
+        const isEq = SKIN_MAP[save.selectedSkin].charId === c.id ? ' equipped-char' : '';
+        rosterHtml += '<button class="pixel-btn small roster-btn' + isAct + isEq + '" data-pick-char="' + c.id + '">' +
+          '<span>' + c.name + '</span><span>' + c.skins.length + '</span></button>';
+      });
+      rosterHtml += '</div>';
+
+      let tabsHtml = '<div class="skin-tabs">';
+      ch.skins.forEach(s => {
+        const sel = s.id === porriSkinId ? ' selected' : '';
+        const mark = save.selectedSkin === s.id ? ' ✓' : (save.unlockedSkins.includes(s.id) ? '' : ' 🔒');
+        tabsHtml += '<button class="pixel-btn small skin-tab' + sel + '" data-pick-skin="' + s.id + '">' + s.name + mark + '</button>';
+      });
+      tabsHtml += '</div>';
+
+      let actionBtn = '';
+      if (equipped) actionBtn = '<button class="pixel-btn primary" disabled>✓ SKIN EQUIPADA</button>';
+      else if (unlocked) actionBtn = '<button class="pixel-btn primary" id="btn-equip-skin">EQUIPAR SKIN</button>';
+      else actionBtn = '<button class="pixel-btn gold" id="btn-buy-skin">DESBLOQUEAR (' + sk.price + ' 🪙)</button>';
+
+      bodyEl.innerHTML =
+        '<div class="porri-layout">' +
+          rosterHtml +
+          '<div class="preview-studio">' +
+            tabsHtml +
+            '<div class="preview-stage-grid">' +
+              '<div class="preview-box">' +
+                '<canvas id="porri-preview-canvas" width="160" height="160"></canvas>' +
+              '</div>' +
+              '<div style="display:flex;flex-direction:column;justify-content:space-between;gap:8px;">' +
+                '<div class="traits-line">' +
+                  '<strong style="color:#facc15;">' + getSkinDisplayName(sk.id) + '</strong><br/>' +
+                  sk.desc + '<br/><br/>' +
+                  '<span style="color:#93c5fd;">Frase de Jefe:</span> "' + sk.taunt + '"' +
+                '</div>' +
+                actionBtn +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      bodyEl.querySelectorAll('[data-pick-char]').forEach(btn => {
+        btn.onclick = () => { AudioSys.click(); porriCharId = btn.getAttribute('data-pick-char'); porriSkinId = CHAR_MAP[porriCharId].skins[0].id; renderShopModal(); };
+      });
+      bodyEl.querySelectorAll('[data-pick-skin]').forEach(btn => {
+        btn.onclick = () => { AudioSys.click(); porriSkinId = btn.getAttribute('data-pick-skin'); renderShopModal(); };
+      });
+
+      const eqBtn = document.getElementById('btn-equip-skin');
+      if (eqBtn) eqBtn.onclick = () => {
+        save.selectedSkin = porriSkinId; persistSave(); AudioSys.powerup();
+        showToast('Piloto equipado: ' + getSkinDisplayName(porriSkinId)); renderShopModal();
+      };
+
+      const buyBtn = document.getElementById('btn-buy-skin');
+      if (buyBtn) buyBtn.onclick = () => {
+        if (save.coins < sk.price) { AudioSys.hit(); showToast('Te faltan monedas (' + sk.price + ')'); return; }
+        save.coins -= sk.price; save.unlockedSkins.push(sk.id); save.selectedSkin = sk.id;
+        persistSave(); AudioSys.powerup(); showToast('¡Desbloqueada: ' + getSkinDisplayName(sk.id) + '!'); renderShopModal();
+      };
+
+      const pc = document.getElementById('porri-preview-canvas');
+      const pCtx = pc.getContext('2d');
+      let pt = 0;
+      function animPrev() {
+        if (activeShop !== 'porri') return;
+        pt += 0.03;
+        pCtx.clearRect(0, 0, 160, 160);
+        pCtx.strokeStyle = 'rgba(255,255,255,0.22)'; pCtx.setLineDash([4, 4]);
+        pCtx.beginPath(); pCtx.moveTo(8, 56); pCtx.lineTo(152, 56); pCtx.stroke(); pCtx.setLineDash([]);
+        pCtx.fillStyle = 'rgba(255,255,255,0.45)'; pCtx.font = '9px Courier New'; pCtx.fillText('100%', 8, 52);
+        pCtx.fillStyle = '#3b2d5e'; pCtx.fillRect(0, 134, 160, 26);
+
+        const feetY = 134 - 16.5 * 2.85 * (sk.heightScale || 1);
+        drawCharacterSprite(pCtx, 82, feetY, sk.id, { scale: 2.85, animT: pt, moving: true, airborne: false, thrusting: Math.sin(pt * 2) > 0.35, showJetpack: true });
+        previewRaf = requestAnimationFrame(animPrev);
+      }
+      animPrev();
+    }
+
+    function renderMercadona(bodyEl) {
+      let html = '<div class="section-hdr">🚀 MODELOS DE JETPACK</div><div class="cards-grid">';
+      JETPACKS.forEach(jp => {
+        const unl = save.unlockedJetpacks.includes(jp.id), eq = save.selectedJetpack === jp.id;
+        html += '<div class="item-card' + (eq ? ' equipped' : '') + '">' +
+          '<div><div class="item-name">' + jp.name + '</div><div class="item-desc">' + jp.desc + '</div></div>' +
+          (eq ? '<button class="pixel-btn small primary" disabled>EQUIPADO</button>'
+            : unl ? '<button class="pixel-btn small blue" data-eq-jp="' + jp.id + '">EQUIPAR</button>'
+            : '<button class="pixel-btn small gold" data-buy-jp="' + jp.id + '">COMPRAR (' + jp.price + ' 🪙)</button>') + '</div>';
+      });
+      html += '</div><div class="section-hdr" style="margin-top:12px;">🔫 PROPULSIÓN Y CAÑÓN AUTO-DISPARO</div>' + buildUpgradesGrid('mercadona');
+      bodyEl.innerHTML = html;
+
+      bodyEl.querySelectorAll('[data-eq-jp]').forEach(btn => {
+        btn.onclick = () => { save.selectedJetpack = btn.getAttribute('data-eq-jp'); persistSave(); AudioSys.powerup(); renderShopModal(); };
+      });
+      bodyEl.querySelectorAll('[data-buy-jp]').forEach(btn => {
+        btn.onclick = () => {
+          const jid = btn.getAttribute('data-buy-jp'), jp = JETPACKS.find(j => j.id === jid);
+          if (save.coins < jp.price) { AudioSys.hit(); showToast('Monedas insuficientes'); return; }
+          save.coins -= jp.price; save.unlockedJetpacks.push(jid); save.selectedJetpack = jid;
+          persistSave(); AudioSys.powerup(); showToast('¡Comprado: ' + jp.name + '!'); renderShopModal();
+        };
+      });
+      bindUpgradeClicks(bodyEl);
+    }
+
+    function buildUpgradesGrid(cat) {
+      let html = '<div class="cards-grid">';
+      UPGRADES[cat].forEach(u => {
+        const lvl = save.upgrades[u.id] || 0, maxd = lvl >= u.max, cost = u.baseCost + lvl * u.step;
+        let pips = '<div class="pips">';
+        for (let i = 0; i < u.max; i++) pips += '<div class="pip' + (i < lvl ? ' on' : '') + '"></div>';
+        pips += '</div>';
+        html += '<div class="item-card"><div><div class="item-name">' + u.name + ' (' + lvl + '/' + u.max + ')</div>' + pips + '<div class="item-desc">' + u.desc + '</div></div>' +
+          (maxd ? '<button class="pixel-btn small primary" disabled>MÁXIMO</button>' : '<button class="pixel-btn small gold" data-up="' + u.id + '" data-cost="' + cost + '">MEJORAR (' + cost + ' 🪙)</button>') + '</div>';
+      });
+      return html + '</div>';
+    }
+
+    function bindUpgradeClicks(bodyEl) {
+      bodyEl.querySelectorAll('[data-up]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.getAttribute('data-up'), cost = parseInt(btn.getAttribute('data-cost'), 10);
+          if (save.coins < cost) { AudioSys.hit(); showToast('Te faltan monedas (' + cost + ')'); return; }
+          save.coins -= cost; save.upgrades[id] = (save.upgrades[id] || 0) + 1;
+          persistSave(); AudioSys.powerup(); showToast('¡Mejora subida a nivel ' + save.upgrades[id] + '!'); renderShopModal();
+        };
+      });
+    }
+
+    // 8. CONTROLES, EVENTOS Y BUCLE PRINCIPAL
+    function syncGlobalUI() {
+      document.getElementById('ui-coins').textContent = save.coins;
+      document.getElementById('ui-record').textContent = save.bestDist;
+      document.getElementById('ui-bosses').textContent = save.bossesDefeated;
+      document.getElementById('hub-pilot').textContent = getSkinDisplayName(save.selectedSkin);
+      const jp = JETPACKS.find(j => j.id === save.selectedJetpack) || JETPACKS[0];
+      document.getElementById('hub-jetpack').textContent = jp.name;
+    }
+
+    function canvasPt(el, clientX, clientY) {
+      const rect = el.getBoundingClientRect();
+      return { x: (clientX - rect.left) * (W / rect.width), y: (clientY - rect.top) * (H / rect.height) };
+    }
+
+    function handleHubTap(clientX, clientY) {
+      AudioSys.init();
+      const pt = canvasPt(hubCanvas, clientX, clientY);
+      const hit = HUB_PLACES.find(p => pt.x >= p.x - 6 && pt.x <= p.x + p.w + 6 && pt.y >= p.y - 6 && pt.y <= p.y + p.h + 24);
+      if (hit) walkToPlace(hit.id);
+      else { walker.target = { x: Math.max(42, Math.min(W - 42, pt.x)), y: Math.max(254, Math.min(486, pt.y)) }; walker.targetPlace = null; }
+    }
+
+    hubCanvas.addEventListener('mousedown', e => { if (appMode === 'hub' && !activeShop) handleHubTap(e.clientX, e.clientY); });
+    hubCanvas.addEventListener('touchstart', e => { if (appMode === 'hub' && !activeShop && e.touches[0]) { e.preventDefault(); handleHubTap(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: false });
+
+    gameCanvas.addEventListener('mousedown', () => { AudioSys.init(); if (appMode === 'play') isHolding = true; });
+    window.addEventListener('mouseup', () => { isHolding = false; });
+    gameCanvas.addEventListener('touchstart', e => { e.preventDefault(); AudioSys.init(); if (appMode === 'play') isHolding = true; }, { passive: false });
+    window.addEventListener('touchend', () => { isHolding = false; });
+    window.addEventListener('touchcancel', () => { isHolding = false; });
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') { keys.up = true; if (appMode === 'play') { e.preventDefault(); isHolding = true; } }
+      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = true;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (appMode === 'play') isHolding = true;
+        else if (appMode === 'hub' && !activeShop && nearbyPlace) interactPlace(nearbyPlace.id);
+      }
+      if ((e.code === 'KeyE' || e.code === 'Enter') && appMode === 'hub' && !activeShop && nearbyPlace) interactPlace(nearbyPlace.id);
+      if (e.code === 'Escape') {
+        if (activeShop) closeAllModals();
+        else if (appMode === 'play') pauseGame();
+        else if (appMode === 'pause') resumeGame();
+      }
+    });
+
+    window.addEventListener('keyup', e => {
+	if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') { keys.up = false; isHolding = false; }
+      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = false;
+      if (e.code === 'Space') isHolding = false;
+    });
+
+    document.querySelectorAll('[data-pad]').forEach(btn => {
+      const dir = btn.getAttribute('data-pad');
+      const down = e => { e.preventDefault(); keys[dir] = true; btn.classList.add('active'); };
+      const up = () => { keys[dir] = false; btn.classList.remove('active'); };
+      btn.addEventListener('mousedown', down);
+      btn.addEventListener('touchstart', down, { passive: false });
+      window.addEventListener('mouseup', up);
+      window.addEventListener('touchend', up);
+    });
+
+    document.querySelectorAll('[data-walk-to]').forEach(btn => { btn.onclick = () => walkToPlace(btn.getAttribute('data-walk-to')); });
+    document.getElementById('btn-hub-interact').onclick = () => { if (nearbyPlace) interactPlace(nearbyPlace.id); };
+
+    function pauseGame() { if (appMode !== 'play') return; appMode = 'pause'; isHolding = false; document.getElementById('pause-modal').classList.add('open'); }
+    function resumeGame() { if (appMode !== 'pause') return; document.getElementById('pause-modal').classList.remove('open'); appMode = 'play'; }
+    function toggleSound() {
+      AudioSys.enabled = !AudioSys.enabled;
+      const ic = AudioSys.enabled ? '🔊' : '🔇';
+      document.getElementById('btn-sound-top').textContent = ic;
+      document.getElementById('btn-sound-hud').textContent = ic;
+      if (AudioSys.enabled) AudioSys.click();
+    }
+
+    document.getElementById('btn-sound-top').onclick = toggleSound;
+    document.getElementById('btn-sound-hud').onclick = toggleSound;
+    document.getElementById('btn-fly-quick').onclick = startRun;
+    document.getElementById('btn-close-shop').onclick = closeAllModals;
+    document.getElementById('btn-pause').onclick = pauseGame;
+    document.getElementById('btn-resume').onclick = resumeGame;
+    document.getElementById('btn-pause-restart').onclick = startRun;
+    document.getElementById('btn-pause-hub').onclick = returnToHub;
+    document.getElementById('btn-run-hub').onclick = returnToHub;
+    document.getElementById('btn-go-retry').onclick = startRun;
+    document.getElementById('btn-go-hub').onclick = returnToHub;
+
+    document.getElementById('btn-unlock-skins').onclick = () => {
+      ALL_SKINS.forEach(s => { if (!save.unlockedSkins.includes(s.id)) save.unlockedSkins.push(s.id); });
+      persistSave(); AudioSys.powerup(); showToast('¡Las 25 skins desbloqueadas! Entra al Bar Porri');
+    };
+
+    let lastT = performance.now();
+    function loop(now) {
+      const dt = Math.min(0.05, (now - lastT) / 1000);
+      lastT = now;
+      if (appMode === 'hub') { if (!activeShop) updateHub(dt); drawHub(); }
+      else if (appMode === 'play') { updatePlay(dt); drawPlay(); }
+      else if (appMode === 'pause' || appMode === 'gameover') { if (run) drawPlay(); }
+      requestAnimationFrame(loop);
+    }
+// === CUENTA EN LA NUBE (FIREBASE) + CONTROLES TÁCTILES MÓVIL ===
+    const FIREBASE_CONFIG = {
+      apiKey: "PEGA_AQUI_TU_API_KEY",
+      authDomain: "TU-PROYECTO.firebaseapp.com",
+      projectId: "TU-PROYECTO",
+      storageBucket: "TU-PROYECTO.firebasestorage.app",
+      messagingSenderId: "000000000000",
+      appId: "1:000000000000:web:xxxxxxxxxxxx"
+    };
+
+    let fbAuth = null, fbDb = null, currentUser = null;
+    const isFirebaseReady = () => FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('PEGA_AQUI') && typeof firebase !== 'undefined';
+
+    function mergeSaves(localS, cloudS) {
+      const merged = {
+        ...defaultSave(),
+        ...cloudS,
+        coins: Math.max(localS.coins || 0, cloudS.coins || 0),
+        bestDist: Math.max(localS.bestDist || 0, cloudS.bestDist || 0),
+        bossesDefeated: Math.max(localS.bossesDefeated || 0, cloudS.bossesDefeated || 0),
+        unlockedSkins: Array.from(new Set([...(localS.unlockedSkins || []), ...(cloudS.unlockedSkins || [])])),
+        unlockedJetpacks: Array.from(new Set([...(localS.unlockedJetpacks || []), ...(cloudS.unlockedJetpacks || [])])),
+        upgrades: { ...defaultSave().upgrades }
+      };
+      Object.keys(merged.upgrades).forEach(k => {
+        merged.upgrades[k] = Math.max((localS.upgrades && localS.upgrades[k]) || 0, (cloudS.upgrades && cloudS.upgrades[k]) || 0);
+      });
+      if (!SKIN_MAP[merged.selectedSkin]) merged.selectedSkin = 'estandar_casual';
+      return merged;
+    }
+
+    async function pullCloudSave(uid) {
+      if (!fbDb) return;
+      try {
+        const doc = await fbDb.collection('players').doc(uid).get();
+        if (doc.exists) {
+          save = mergeSaves(save, doc.data());
+          try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {}
+          syncGlobalUI();
+          showToast('☁️ Progreso cargado de la nube');
+        }
+        await pushCloudSave();
+      } catch (e) { showToast('No se pudo sincronizar la nube'); }
+    }
+
+    async function pushCloudSave() {
+      if (!fbDb || !currentUser) return;
+      try {
+        await fbDb.collection('players').doc(currentUser.uid).set({
+          ...save,
+          email: currentUser.email || '',
+          updatedAt: Date.now()
+        }, { merge: true });
+      } catch (e) {}
+    }
+
+    function updateAccountUI() {
+      const btn = document.getElementById('btn-account');
+      const status = document.getElementById('auth-status');
+      const formBox = document.getElementById('auth-form-box');
+      const loggedBox = document.getElementById('auth-logged-box');
+      if (!btn) return;
+      if (currentUser) {
+        const nick = (currentUser.email || 'Usuario').split('@')[0].slice(0, 10);
+        btn.textContent = '☁️ ' + nick;
+        btn.className = 'pixel-btn small primary';
+        btn.style.animation = 'none';
+        status.textContent = 'Conectado como ' + currentUser.email + '. Tu progreso se guarda automáticamente en todos tus dispositivos.';
+        formBox.style.display = 'none';
+        loggedBox.style.display = 'flex';
+      } else {
+        btn.textContent = '👤 CUENTA';
+        btn.className = 'pixel-btn small blue';
+        status.textContent = isFirebaseReady()
+          ? 'Inicia sesión o crea cuenta para guardar monedas, récords y skins en el móvil y PC.'
+          : 'Guardado local activo. Pega tus claves de Firebase para activar la nube o usa el código de respaldo.';
+        formBox.style.display = isFirebaseReady() ? 'flex' : 'none';
+        loggedBox.style.display = 'none';
+      }
+    }
+
+    function authErrorText(code) {
+      if (code === 'auth/email-already-in-use') return 'Ese correo ya existe. Pulsa ENTRAR.';
+      if (code === 'auth/weak-password') return 'La contraseña debe tener al menos 6 caracteres.';
+      if (code === 'auth/invalid-email') return 'Escribe un correo válido.';
+      if (code === 'auth/wrong-password' || code === 'auth/user-not-found' || code === 'auth/invalid-credential') return 'Correo o contraseña incorrectos.';
+      return 'Error de acceso (' + (code || 'red') + ')';
+    }
+
+    function initCloudAndMobile() {
+      // Botón táctil grande para volar desde móvil
+      const boostBtn = document.getElementById('btn-mobile-boost');
+      if (boostBtn) {
+        const startBoost = e => { e.preventDefault(); AudioSys.init(); if (appMode === 'play') isHolding = true; };
+        const stopBoost = e => { e.preventDefault(); isHolding = false; };
+        boostBtn.addEventListener('touchstart', startBoost, { passive: false });
+        boostBtn.addEventListener('touchend', stopBoost, { passive: false });
+        boostBtn.addEventListener('touchcancel', stopBoost, { passive: false });
+        boostBtn.addEventListener('mousedown', startBoost);
+      }
+
+      // Evitar menú contextual en pulsación larga en móvil y soltar controles al cambiar de app
+      [hubCanvas, gameCanvas, boostBtn].forEach(el => {
+        if (el) el.addEventListener('contextmenu', e => e.preventDefault());
+      });
+      window.addEventListener('blur', () => { isHolding = false; keys.left = keys.right = keys.up = keys.down = false; });
+
+      // Eventos del modal de cuenta
+      document.getElementById('btn-account').onclick = () => { AudioSys.click(); updateAccountUI(); document.getElementById('auth-modal').classList.add('open'); };
+      document.getElementById('btn-close-auth').onclick = () => document.getElementById('auth-modal').classList.remove('open');
+
+      document.getElementById('btn-auth-login').onclick = async () => {
+        if (!fbAuth) return;
+        const email = document.getElementById('auth-email').value.trim();
+        const pass = document.getElementById('auth-pass').value;
+        try {
+          await fbAuth.signInWithEmailAndPassword(email, pass);
+          AudioSys.powerup(); showToast('¡Sesión iniciada!');
+          document.getElementById('auth-modal').classList.remove('open');
+        } catch (e) { AudioSys.hit(); showToast(authErrorText(e.code)); }
+      };
+
+      document.getElementById('btn-auth-register').onclick = async () => {
+        if (!fbAuth) return;
+        const email = document.getElementById('auth-email').value.trim();
+        const pass = document.getElementById('auth-pass').value;
+        try {
+          await fbAuth.createUserWithEmailAndPassword(email, pass);
+          AudioSys.powerup(); showToast('¡Cuenta creada y guardada!');
+          document.getElementById('auth-modal').classList.remove('open');
+        } catch (e) { AudioSys.hit(); showToast(authErrorText(e.code)); }
+      };
+
+      document.getElementById('btn-auth-logout').onclick = async () => {
+        if (!fbAuth) return;
+        await fbAuth.signOut();
+        showToast('Sesión cerrada');
+      };
+
+      document.getElementById('btn-export-code').onclick = () => {
+        const code = btoa(unescape(encodeURIComponent(JSON.stringify(save))));
+        document.getElementById('backup-code').value = code;
+        if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
+        showToast('Código copiado: pégalo en otro dispositivo');
+      };
+
+      document.getElementById('btn-import-code').onclick = () => {
+        try {
+          const raw = document.getElementById('backup-code').value.trim();
+          const parsed = JSON.parse(decodeURIComponent(escape(atob(raw))));
+          save = mergeSaves(save, parsed);
+          persistSave();
+          AudioSys.powerup();
+          showToast('¡Progreso importado!');
+        } catch (e) { AudioSys.hit(); showToast('Código inválido'); }
+      };
+
+      if (isFirebaseReady()) {
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+          fbAuth = firebase.auth();
+          fbDb = firebase.firestore();
+          fbAuth.onAuthStateChanged(async user => {
+            currentUser = user;
+            updateAccountUI();
+            if (user) await pullCloudSave(user.uid);
+          });
+        } catch (e) {}
+      } else {
+        updateAccountUI();
+      }
+    }
+    loadSave();
+    syncGlobalUI();
+	initCloudAndMobile();
+    requestAnimationFrame(loop);
+  })();
+  </script>
+</body>
+</html>
